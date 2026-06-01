@@ -1327,6 +1327,8 @@ var _msgSwipe={active:false,el:null,wrap:null,mid:null,startX:0,startY:0,trigger
 document.addEventListener('touchstart',function(e){
   var msg=e.target.closest('.msg');
   if(!msg||!CONV)return;
+  // Ignorar se começou na borda esquerda (reservado para swipe-voltar)
+  if(e.touches[0].clientX<=30)return;
   var wrap=msg.closest('.msg-wrap');
   _msgSwipe={active:true,el:msg,wrap:wrap,mid:msg.dataset.mid,startX:e.touches[0].clientX,startY:e.touches[0].clientY,triggered:false};
 },{passive:true});
