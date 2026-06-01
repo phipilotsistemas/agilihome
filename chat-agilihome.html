@@ -196,15 +196,14 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
     <input type="text" placeholder="Pesquisar conversas..." id="in-search" style="border:none;background:none;outline:none;font-size:13px;color:#0F172A;flex:1;font-family:inherit" oninput="filtrarConversas(this.value)">
   </div>
   <div class="filters">
-    <button class="flt flt-a" onclick="filtrar('todos',this)">Todas</button>
-    <button class="flt flt-i" onclick="filtrar('grupos',this)">Grupos</button>
-    <button class="flt flt-i" onclick="filtrar('equipe',this)">Equipe</button>
-    <button class="flt flt-i" onclick="filtrar('franqueados',this)">Franqueados</button>
+    <button class="flt flt-a" id="flt-todos" onclick="filtrar('todos',this)">Todas</button>
+    <button class="flt flt-i" id="flt-naoLidas" onclick="filtrar('naoLidas',this)">Não lidas</button>
+    <button class="flt flt-i" id="flt-grupos" onclick="filtrar('grupos',this)">Grupos</button>
   </div>
   <!-- LISTA ROLA -->
   <div id="lista-conv"></div>
   <!-- FAB -->
-  <button class="fab" onclick="abrirModalGrupo()">+</button>
+  <button class="fab" onclick="abrirModalFab()">+</button>
   <!-- BOTTOM NAV FIXO -->
   <div class="bnav">
     <button class="nb active" id="nb-conv" onclick="navTab('conv')">
@@ -233,6 +232,19 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
     <button class="in-formal hi" id="btn-formal" onclick="toggleFormal()">&#9878;</button>
     <textarea class="in-txt" id="in-msg" placeholder="Mensagem..." rows="1" oninput="autoResize(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviar()}"></textarea>
     <button class="in-send" onclick="enviar()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+  </div>
+</div>
+
+<!-- MODAL ESCOLHA FAB -->
+<div class="modal-bg hi" id="modal-fab">
+  <div class="modal" style="gap:10px">
+    <div class="modal-title">Nova conversa</div>
+    <button class="btn-criar" style="border-radius:12px;padding:14px;font-size:15px" onclick="fecharModalFab();abrirModalGrupo()">
+      👥 Criar grupo
+    </button>
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94A3B8;margin-top:4px">Conversa direta</div>
+    <div id="fab-diretos-list"></div>
+    <button class="btn-cancel" onclick="fecharModalFab()">Cancelar</button>
   </div>
 </div>
 
@@ -428,6 +440,7 @@ function renderLista(){
       var g=grupos[id];
       if(_filtro==='grupos'&&g.tipo!=='grupo')return;
       if(_filtro==='equipe'&&g.tipo!=='direto')return;
+      // naoLidas — renderizar todos primeiro, depois ocultar via JS
       var isLogo=(id==='g_rede');
       var avInner=isLogo?'<img src="icon-192.png" alt="" style="width:100%;height:100%;object-fit:cover">':ini(g.nome);
       var avSt=isLogo?'background:#fff;border:2px solid #EA580C':'background:'+g.cor;
@@ -527,6 +540,13 @@ document.addEventListener('click',function(e){
     excluirConversa(del.dataset.del,del.dataset.nome);
     return;
   }
+  // FAB direto
+  var dir=e.target.closest('[data-direto]');
+  if(dir&&dir.dataset.direto){
+    fecharModalFab();
+    iniciarDireto(dir.dataset.direto);
+    return;
+  }
   // Abrir chat
   var cv=e.target.closest('.cv');
   if(cv&&cv.dataset.canal)abrirChat(cv.dataset.canal,cv.dataset.nome,cv.dataset.cor,cv.dataset.tipo);
@@ -536,6 +556,13 @@ function filtrar(tipo,btn){
   document.querySelectorAll('.flt').forEach(function(f){f.className='flt flt-i'});
   btn.className='flt flt-a';
   renderLista();
+}
+// Filtro não lidas aplicado no renderLista
+function temNaoLida(id){
+  var lastVisto=parseInt(localStorage.getItem('visto_'+id)||'0');
+  // Verificação simplificada pelo badge visível
+  var badge=document.getElementById('badge_'+id);
+  return badge&&badge.style.display!=='none';
 }
 function filtrarConversas(q){
   document.querySelectorAll('.cv').forEach(function(cv){
@@ -550,11 +577,25 @@ function toggleSearch(){
 
 /* ── NAV TABS ── */
 function navTab(tab){
-  ['conv','perf'].forEach(function(t){
-    document.getElementById('nb-'+t).classList.toggle('active',t===tab);
+  ['conv','cont','perf'].forEach(function(t){
+    var el=document.getElementById('nb-'+t);
+    if(el)el.classList.toggle('active',t===tab);
   });
-  if(tab==='conv'){renderLista();}
-  else if(tab==='perf'){mostrarPerfil();}
+  // Mostrar/ocultar filtros e FAB só em conversas
+  var filtros=document.querySelector('.filters');
+  var searchBar=document.getElementById('search-bar');
+  var fab=document.querySelector('.fab');
+  if(tab==='conv'){
+    if(filtros)filtros.style.display='flex';
+    if(fab)fab.style.display='flex';
+    renderLista();
+  } else {
+    if(filtros)filtros.style.display='none';
+    if(searchBar)searchBar.classList.add('hi');
+    if(fab)fab.style.display='none';
+    if(tab==='cont')mostrarContatos();
+    else if(tab==='perf')mostrarPerfil();
+  }
 }
 
 function mostrarPerfil(){
@@ -626,6 +667,23 @@ function salvarPerfil(){
 
 /* ── MODAL CRIAR GRUPO ── */
 var _membrosSel={};
+function abrirModalFab(){
+  // Preencher lista de diretos disponíveis
+  var lista=document.getElementById('fab-diretos-list');
+  if(!lista)return;
+  var html='';
+  Object.keys(USERS).forEach(function(tk){
+    if(tk===SESSAO.token)return;
+    var u=USERS[tk];
+    html+='<div style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:#F8FAFC;cursor:pointer;margin-bottom:6px" data-direto="'+tk+'">';
+    html+='<div style="width:36px;height:36px;border-radius:50%;background:'+u.cor+';display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px">'+ini(u.nome)+'</div>';
+    html+='<div><div style="font-size:13px;font-weight:700;color:#0F172A">'+u.nome+'</div><div style="font-size:11px;color:#94A3B8">'+u.cargo+'</div></div></div>';
+  });
+  lista.innerHTML=html;
+  document.getElementById('modal-fab').classList.remove('hi');
+}
+function fecharModalFab(){document.getElementById('modal-fab').classList.add('hi');}
+
 function abrirModalGrupo(){
   _membrosSel={};
   $('grupo-nome').value='';
