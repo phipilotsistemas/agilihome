@@ -95,7 +95,9 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .msg-wrap.mine{align-self:flex-end;align-items:flex-end}
 .msg-wrap.theirs{align-self:flex-start;align-items:flex-start}
 .msg-au{font-size:10px;font-weight:700;color:var(--orange);margin-bottom:2px;padding:0 4px}
-.msg{border-radius:14px;padding:8px 12px;font-size:13.5px;line-height:1.5;position:relative;word-break:break-word}
+.msg{border-radius:14px;padding:8px 12px;font-size:13.5px;line-height:1.5;position:relative;word-break:break-word;transition:transform .15s ease}
+.msg-wrap{transition:transform .15s ease}
+.reply-icon{position:absolute;display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:var(--orange);color:#fff;opacity:0;transition:opacity .15s;pointer-events:none;font-size:14px}
 .msg.mine{background:var(--orange);color:#fff;border-bottom-right-radius:4px}
 .msg.theirs{background:#fff;border:1px solid var(--gray-200);color:var(--gray-900);border-bottom-left-radius:4px}
 .msg.formal{background:#FFF7ED;border:2px solid var(--orange);color:var(--gray-900);border-bottom-left-radius:4px;display:flex;flex-direction:column;align-items:flex-start}
@@ -290,6 +292,11 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 <!-- INPUT ARQUIVO OCULTO -->
 <input type="file" id="input-arquivo" accept="image/*" style="display:none" onchange="enviarImagem(this)">
 
+<!-- REPLY SWIPE ICON -->
+<div id="reply-swipe-icon" style="position:fixed;z-index:150;width:32px;height:32px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;color:#fff;opacity:0;pointer-events:none;transition:opacity .1s;font-size:14px">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 00-4-4H4"/></svg>
+</div>
+
 <!-- VISUALIZADOR DE IMAGEM -->
 <div class="img-viewer" id="img-viewer" onclick="fecharImgViewer()">
   <img id="img-viewer-img" src="" alt="">
@@ -423,7 +430,7 @@ var VAPID='BNHCHKb8AKd3bL5T8X_4D0g9bj4Z4iZRoDtQt4RjE8psDThDg1AYRlUMhEeHbTg8ZQEt_
 
 /* ── USUÁRIOS ── */
 var USERS={
-  'ADM-MARCO':{nome:'Marco Antonio de Borba',cargo:'Sócio · Rede Mestre da Obra',tipo:'admin',cor:'#EA580C'},
+  'ADM-MARCO':{nome:'Marco Antonio de Borba',cargo:'Administrador · AgiliHome',tipo:'admin',cor:'#EA580C'},
   'ADM-JOAO':{nome:'João Gabriel Campos',cargo:'Advogado',tipo:'admin',cor:'#1E40AF'},
   'ADM-PHILLIPE':{nome:'Phillipe de Paula',cargo:'Administrador PhiPilot',tipo:'admin',cor:'#7C3AED'}
 };
@@ -1314,6 +1321,45 @@ document.addEventListener('touchend',function(e){
   _swipeStart={x:0,y:0,ctx:null,el:null};
 },{passive:true});
 document.addEventListener('touchstart',function(e){if(!e.target.closest('.cv')){document.querySelectorAll('.cv.swipe-open').forEach(function(c){c.classList.remove('swipe-open');});}},{passive:true});
+
+/* ── SWIPE PARA RESPONDER (balão) ── */
+var _msgSwipe={active:false,el:null,wrap:null,mid:null,startX:0,startY:0,triggered:false};
+document.addEventListener('touchstart',function(e){
+  var msg=e.target.closest('.msg');
+  if(!msg||!CONV)return;
+  var wrap=msg.closest('.msg-wrap');
+  _msgSwipe={active:true,el:msg,wrap:wrap,mid:msg.dataset.mid,startX:e.touches[0].clientX,startY:e.touches[0].clientY,triggered:false};
+},{passive:true});
+document.addEventListener('touchmove',function(e){
+  if(!_msgSwipe.active||!_msgSwipe.el)return;
+  var dx=e.touches[0].clientX-_msgSwipe.startX;
+  var dy=Math.abs(e.touches[0].clientY-_msgSwipe.startY);
+  if(dy>20&&dy>Math.abs(dx)){_msgSwipe.active=false;return;} // scroll vertical
+  if(dx>0&&dx<80){
+    _msgSwipe.el.style.transform='translateX('+dx+'px)';
+    // Mostrar ícone de reply
+    var ico=document.getElementById('reply-swipe-icon');
+    if(ico){ico.style.opacity=Math.min(dx/50,1);ico.style.left=(_msgSwipe.el.getBoundingClientRect().left-40+dx)+'px';ico.style.top=(_msgSwipe.el.getBoundingClientRect().top+_msgSwipe.el.offsetHeight/2-16)+'px';}
+  }
+},{passive:true});
+document.addEventListener('touchend',function(e){
+  if(!_msgSwipe.active||!_msgSwipe.el)return;
+  var dx=e.changedTouches[0].clientX-_msgSwipe.startX;
+  // Animar volta
+  _msgSwipe.el.style.transform='';
+  var ico=document.getElementById('reply-swipe-icon');
+  if(ico)ico.style.opacity='0';
+  if(dx>60&&!_msgSwipe.triggered&&_msgSwipe.mid){
+    _msgSwipe.triggered=true;
+    // Vibração tátil
+    if(navigator.vibrate)navigator.vibrate(30);
+    // Buscar mensagem e setar reply
+    db.ref('mensagens/'+CONV.canal+'/'+_msgSwipe.mid).once('value').then(function(snap){
+      var m=snap.val();if(m)setReply(m);
+    });
+  }
+  _msgSwipe={active:false,el:null,wrap:null,mid:null,startX:0,startY:0,triggered:false};
+},{passive:true});
 </script>
 </body>
 </html>
