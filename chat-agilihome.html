@@ -14,6 +14,7 @@
 html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#fff}
 #app{height:100%;max-width:430px;margin:0 auto;display:flex;flex-direction:column;position:relative;overflow:hidden}
 .hi{display:none!important}
+/* LOGIN */
 #tela-login{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:32px 24px}
 .lg-logo{width:80px;height:80px;margin-bottom:14px}
 .lg-marca{font-size:24px;font-weight:800;margin-bottom:3px}
@@ -26,23 +27,27 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .lg-inp{width:100%;padding:12px 14px;background:#fff;border:1.5px solid #E2E8F0;border-radius:10px;font-size:16px;color:#0F172A;outline:none;margin-bottom:12px;font-family:inherit;transition:border-color .15s}
 .lg-inp:focus{border-color:#EA580C}
 .lg-inp::placeholder{color:#94A3B8}
-.lg-btn{width:100%;padding:14px;background:#EA580C;border:none;border-radius:12px;font-size:15px;font-weight:700;color:#fff;cursor:pointer;transition:background .15s,transform .1s}
-.lg-btn:active{background:#C2410C;transform:scale(.98)}
+.lg-btn{width:100%;padding:14px;background:#EA580C;border:none;border-radius:12px;font-size:15px;font-weight:700;color:#fff;cursor:pointer}
+.lg-btn:active{background:#C2410C}
 .lg-err{color:#EF4444;font-size:12px;margin-top:-6px;margin-bottom:10px;display:none}
 .lg-back{background:none;border:none;color:#94A3B8;font-size:13px;margin-top:12px;cursor:pointer;width:100%}
 .lg-demo{margin-top:18px;font-size:11px;color:#94A3B8;text-align:center;line-height:2}
 .lg-demo b{color:#475569;cursor:pointer;text-decoration:underline}
 .lg-loading{text-align:center;padding:20px;color:#94A3B8;font-size:13px}
+
+/* TELA MAIN — layout fixo em colunas */
+#tela-main{display:flex;flex-direction:column;height:100%;overflow:hidden}
 .hdr{background:#EA580C;padding:calc(env(safe-area-inset-top,0px) + 10px) 16px 10px;display:flex;align-items:center;gap:10px;flex-shrink:0}
 .hdr-t{font-size:18px;font-weight:700;flex:1}
 .hdr-i{color:rgba(255,255,255,.8);font-size:20px;padding:4px;cursor:pointer;background:none;border:none}
-.search-bar{margin:8px 12px;background:#F1F5F9;border-radius:22px;padding:9px 14px;display:flex;align-items:center;gap:8px;font-size:13px;color:#94A3B8}
+.search-bar{margin:8px 12px;background:#F1F5F9;border-radius:22px;padding:9px 14px;display:flex;align-items:center;gap:8px;font-size:13px;color:#94A3B8;flex-shrink:0}
 .filters{display:flex;gap:6px;padding:4px 12px 8px;flex-shrink:0}
 .flt{padding:5px 14px;border-radius:16px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:background .15s}
 .flt-a{background:#EA580C;color:#fff}
 .flt-i{background:#F1F5F9;color:#475569}
-#lista-conv{flex:1;overflow-y:auto}
-.cv{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid #F1F5F9;cursor:pointer;transition:background .1s}
+/* LISTA ROLA, o resto não */
+#lista-conv{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.cv{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid #F1F5F9;cursor:pointer}
 .cv:active{background:#F8FAFC}
 .cv-a{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff;flex-shrink:0;overflow:hidden}
 .cv-a img{width:100%;height:100%;object-fit:cover}
@@ -53,12 +58,19 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .cv-tu{font-size:11px;color:#EA580C;font-weight:600;flex-shrink:0}
 .cv-p{font-size:12.5px;color:#475569;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
 .cv-bg{min-width:20px;height:20px;border-radius:10px;background:#EA580C;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px;flex-shrink:0}
-.fab{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 72px);right:16px;width:50px;height:50px;border-radius:50%;background:#EA580C;border:none;display:flex;align-items:center;justify-content:center;color:#fff;font-size:26px;box-shadow:0 4px 14px rgba(234,88,12,.4);cursor:pointer;z-index:5}
+
+/* FAB — posicionado acima do bnav fixo */
+.fab{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 72px);right:calc(50% - 215px + 16px);width:50px;height:50px;border-radius:50%;background:#EA580C;border:none;display:flex;align-items:center;justify-content:center;color:#fff;font-size:26px;box-shadow:0 4px 14px rgba(234,88,12,.4);cursor:pointer;z-index:10}
 .fab:active{transform:scale(.93)}
-.bnav{display:flex;background:#fff;border-top:1px solid #E2E8F0;padding:10px 0 calc(env(safe-area-inset-bottom,0px) + 14px);flex-shrink:0}
+@media(max-width:430px){.fab{right:16px}}
+
+/* BOTTOM NAV — sempre fixo */
+.bnav{display:flex;background:#fff;border-top:1px solid #E2E8F0;padding:10px 0 calc(env(safe-area-inset-bottom,0px) + 10px);flex-shrink:0}
 .nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;font-weight:600;color:#94A3B8;cursor:pointer;border:none;background:none}
 .nb.active{color:#EA580C}
 .nb svg{width:26px;height:26px}
+
+/* TELA CHAT — cobre tudo */
 #tela-chat{flex-direction:column;height:100%;position:absolute;inset:0;z-index:20;background:#fff}
 .ch-hdr{background:#C2410C;padding:calc(env(safe-area-inset-top,0px) + 8px) 12px 8px;display:flex;align-items:center;gap:10px;flex-shrink:0}
 .ch-back{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:4px}
@@ -68,7 +80,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .ch-nm{font-size:15px;font-weight:700;color:#fff}
 .ch-sb{font-size:11px;color:rgba(255,255,255,.55)}
 .ch-hdr-i{color:rgba(255,255,255,.7);font-size:18px;padding:4px;background:none;border:none;cursor:pointer}
-#msgs-area{flex:1;overflow-y:auto;padding:12px;background:#F0F4F8;display:flex;flex-direction:column;gap:2px}
+#msgs-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px;background:#F0F4F8;display:flex;flex-direction:column;gap:2px}
 .date-sep{align-self:center;background:rgba(148,163,184,.25);border-radius:8px;padding:3px 10px;font-size:10px;color:#475569;margin:6px 0}
 .msg{max-width:78%;border-radius:14px;padding:8px 12px;font-size:13.5px;line-height:1.5;margin-bottom:1px}
 .msg-in{align-self:flex-start;background:#fff;border:1px solid #E2E8F0;color:#0F172A;border-bottom-left-radius:4px}
@@ -79,15 +91,41 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .msg-tm{font-size:9px;color:#94A3B8;margin-top:2px;text-align:right}
 .msg-tmo{font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;text-align:right}
 .input-area{padding:8px 10px;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 10px);background:#fff;border-top:1px solid #E2E8F0;display:flex;align-items:flex-end;gap:8px;flex-shrink:0}
-.in-formal{background:none;border:none;font-size:20px;color:#94A3B8;cursor:pointer;padding:6px;border-radius:8px}
-.in-formal.active{color:#EA580C}
 .in-txt{flex:1;background:#F1F5F9;border:1.5px solid #E2E8F0;border-radius:22px;padding:9px 14px;font-size:16px;color:#0F172A;outline:none;resize:none;max-height:100px;line-height:1.4;font-family:inherit;transition:border-color .15s}
 .in-txt:focus{border-color:#EA580C}
 .in-txt::placeholder{color:#94A3B8}
-.in-send{width:38px;height:38px;border-radius:50%;background:#EA580C;border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s,transform .1s}
+.in-send{width:38px;height:38px;border-radius:50%;background:#EA580C;border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .in-send:active{background:#C2410C;transform:scale(.93)}
-.toast{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 80px);left:50%;transform:translateX(-50%);background:#0F172A;color:#fff;padding:10px 18px;border-radius:12px;font-size:13px;font-weight:600;z-index:200;white-space:nowrap;animation:ti .25s ease;box-shadow:0 6px 20px rgba(0,0,0,.2)}
+
+/* MODAL GRUPO */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.modal{background:#fff;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:430px;max-height:85vh;display:flex;flex-direction:column;gap:14px}
+.modal-title{font-size:16px;font-weight:800;color:#0F172A}
+.modal-inp{width:100%;padding:12px 14px;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:10px;font-size:15px;color:#0F172A;outline:none;font-family:inherit}
+.modal-inp:focus{border-color:#EA580C}
+.modal-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94A3B8;margin-bottom:4px}
+.membros-list{display:flex;flex-direction:column;gap:6px;max-height:240px;overflow-y:auto}
+.membro-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:#F8FAFC;cursor:pointer}
+.membro-item.sel{background:#FFF7ED;border:1.5px solid #EA580C}
+.membro-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff;flex-shrink:0}
+.membro-nome{font-size:13px;font-weight:600;color:#0F172A;flex:1}
+.membro-chk{width:20px;height:20px;border-radius:50%;border:2px solid #E2E8F0;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+.membro-item.sel .membro-chk{background:#EA580C;border-color:#EA580C;color:#fff}
+.modal-actions{display:flex;gap:10px}
+.btn-cancel{flex:1;padding:12px;border-radius:12px;border:1.5px solid #E2E8F0;background:#fff;font-size:14px;font-weight:600;color:#475569;cursor:pointer}
+.btn-criar{flex:2;padding:12px;border-radius:12px;border:none;background:#EA580C;font-size:14px;font-weight:700;color:#fff;cursor:pointer}
+.btn-criar:active{background:#C2410C}
+
+/* TOAST */
+.toast{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 90px);left:50%;transform:translateX(-50%);background:#0F172A;color:#fff;padding:10px 18px;border-radius:12px;font-size:13px;font-weight:600;z-index:200;white-space:nowrap;animation:ti .25s ease;box-shadow:0 6px 20px rgba(0,0,0,.2)}
 @keyframes ti{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+.in-formal{background:none;border:none;font-size:20px;color:#94A3B8;cursor:pointer;padding:6px;border-radius:8px}
+.in-formal.active{color:#EA580C}
+.msg-formal-out{align-self:flex-end;background:#FFF7ED;border:2px solid #EA580C;color:#0F172A;border-bottom-right-radius:4px}
+.msg-formal-in{align-self:flex-start;background:#FFF7ED;border:2px solid #EA580C;color:#0F172A;border-bottom-left-radius:4px}
+
+.cv-badge{min-width:20px;height:20px;border-radius:10px;background:#EA580C;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 5px;flex-shrink:0}
 ::-webkit-scrollbar{width:0}
 </style>
 </head>
@@ -96,13 +134,13 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 
 <!-- LOGIN -->
 <div id="tela-login">
-  <img class="lg-logo" src="data:image/png;base64,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" alt="agilihome">
+  <img class="lg-logo" src="data:image/png;base64,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" alt="agilihome">
   <div class="lg-marca"><span style="color:#6B7280">agili</span><span style="color:#EA580C">home</span></div>
   <div class="lg-sub">Chat interno da rede<br>Registro formal de conversas</div>
   <div class="lg-card" id="step-token">
     <label class="lg-lbl">Token de acesso</label>
     <input class="lg-inp" id="in-token" type="text" placeholder="Ex: ADM-MARCO" autocomplete="off" autocapitalize="characters" spellcheck="false" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')stepToken()">
-    <div class="lg-err" id="err-token">Token nao reconhecido.</div>
+    <div class="lg-err" id="err-token">Token não reconhecido.</div>
     <button class="lg-btn" onclick="stepToken()">Continuar</button>
     <div class="lg-demo"><b onclick="fillToken('ADM-MARCO')">ADM-MARCO</b> <b onclick="fillToken('COM-LARA')">COM-LARA</b> <b onclick="fillToken('COM-EDUARDO')">COM-EDUARDO</b></div>
   </div>
@@ -111,7 +149,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
     <div class="lg-cn" id="reg-nome"></div>
     <div class="lg-cc" id="reg-cargo"></div>
     <label class="lg-lbl">Criar senha para este dispositivo</label>
-    <input class="lg-inp" id="in-senha-nova" type="password" placeholder="Minimo 6 caracteres" onkeydown="if(event.key==='Enter')registrar()">
+    <input class="lg-inp" id="in-senha-nova" type="password" placeholder="Mínimo 6 caracteres" onkeydown="if(event.key==='Enter')registrar()">
     <div class="lg-err" id="err-reg">Senha deve ter pelo menos 6 caracteres.</div>
     <button class="lg-btn" onclick="registrar()">Registrar dispositivo</button>
     <button class="lg-back" onclick="voltarToken()">Voltar</button>
@@ -120,7 +158,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
     <div class="lg-av" id="log-av"></div>
     <div class="lg-cn" id="log-nome"></div>
     <div class="lg-cc" id="log-cargo"></div>
-    <label class="lg-lbl">Senha (crie uma no primeiro acesso)</label>
+    <label class="lg-lbl">Senha</label>
     <input class="lg-inp" id="in-senha" type="password" placeholder="......" onkeydown="if(event.key==='Enter')logar()">
     <div class="lg-err" id="err-log">Senha incorreta.</div>
     <button class="lg-btn" onclick="logar()">Entrar</button>
@@ -147,12 +185,21 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
     <button class="flt flt-i" onclick="filtrar('equipe',this)">Equipe</button>
     <button class="flt flt-i" onclick="filtrar('franqueados',this)">Franqueados</button>
   </div>
+  <!-- LISTA ROLA -->
   <div id="lista-conv"></div>
-  <button class="fab" onclick="novaConversa()">+</button>
+  <!-- FAB -->
+  <button class="fab" onclick="abrirModalGrupo()">+</button>
+  <!-- BOTTOM NAV FIXO -->
   <div class="bnav">
-    <button class="nb active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>Conversas</span></button>
-    <button class="nb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg><span>Contatos</span></button>
-    <button class="nb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Perfil</span></button>
+    <button class="nb active" id="nb-conv" onclick="navTab('conv')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <span>Conversas</span>
+    </button>
+
+    <button class="nb" id="nb-perf" onclick="navTab('perf')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Perfil</span>
+    </button>
   </div>
 </div>
 
@@ -162,14 +209,33 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
     <button class="ch-back" onclick="voltarLista()">&#8592;</button>
     <div class="ch-av" id="ch-avatar"></div>
     <div class="ch-info"><div class="ch-nm" id="ch-nome"></div><div class="ch-sb" id="ch-sub"></div></div>
-    <button class="ch-hdr-i">&#9742;</button>
+    <!-- telefone REMOVIDO -->
     <button class="ch-hdr-i">&#8942;</button>
   </div>
   <div id="msgs-area"></div>
   <div class="input-area">
-    <button class="in-formal" id="btn-formal" onclick="toggleFormal()">&#9878;</button>
+    <button class="in-formal hi" id="btn-formal" onclick="toggleFormal()">&#9878;</button>
     <textarea class="in-txt" id="in-msg" placeholder="Mensagem..." rows="1" oninput="autoResize(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviar()}"></textarea>
     <button class="in-send" onclick="enviar()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+  </div>
+</div>
+
+<!-- MODAL CRIAR GRUPO -->
+<div class="modal-bg hi" id="modal-grupo">
+  <div class="modal">
+    <div class="modal-title">Criar novo grupo</div>
+    <div>
+      <div class="modal-label">Nome do grupo</div>
+      <input class="modal-inp" id="grupo-nome" type="text" placeholder="Ex: Expansão Norte" maxlength="40">
+    </div>
+    <div>
+      <div class="modal-label" style="margin-bottom:8px">Membros</div>
+      <div class="membros-list" id="membros-list"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="fecharModalGrupo()">Cancelar</button>
+      <button class="btn-criar" onclick="criarGrupo()">Criar grupo</button>
+    </div>
   </div>
 </div>
 
@@ -185,7 +251,7 @@ firebase.initializeApp(CFG);
 var auth=firebase.auth(), db=firebase.database();
 var LOGO32="iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAADZklEQVR42u2WX2iWZRjGf8/7vp+uZU4ycDUr68TIkxbB9KSgzSjouHQVBLMOckJkBuKBFuhWzY0gKQdSEERNYQcVkWYWVEPcP4WmNS3at7G5Nlpzfvv2fe/zXB28r18b6b79MyF2nzzvn/u574vrue/ruY0kcQPN4wbbIoBFAPMAIHAhyM4LgJlTG8qC8ae+44Ex15kBKZdccrjORlzyuwiMMREj140BF4IXRI/JE3BsGyb5EyRAD1ZhHt6LKVwVgURgvAViQDYK6AUodRH35fOYDx7FZC+h5z5DFTWYjkNw8F7cmUZkTJTcxfvyszqNORstkuzpRrn6QrkaZH/YI5dN5dzs8FnZw4/L7UHuozLZ/lOTYrhpU1wbQLzR9n0v+2Gpwt3IHnlCbvjcZKecn5Nkf26SfXeVwjeQ/XqbXPrPf/xmBcCFkqTwx9fldiO9f6f0++eTfmcUhqHCicuymXEpnJBsNvoZjkktu+T2ItuwXO5iewzUXjXVNWogaicT3IQeeY2xTW10XFqLXIicxfgJfN/Hb9mO17kf/CVRgcoyNJLhzK0voi0d6J4n43Y1c6uBMF4//qRJO3a8mvve19ur5uZmtRx5Sz1Ha+VO7lN2+BdJ0m8XzquyslL9Q3/lIX9aBmILM+BCMuMpli4tBGB0dJT6hnfo6+3j4PE/aOlfjun/FvvFswAEiQR+sIQwNRK1rnPzaEPjgxfgBQFOUaCeniSZbJat1Vt56L47cEVroaIBkx6KBdpgjMHzg+hY8qjjjNTilmXLSKXGAViz5m4KCgqoq6vnZGs7Cc9BahDZLJK4PDYGQGHhzTMSomBaAmL069bdz6dNhxkYGKC4uJjtr7xMZ+dpNm4s5/aSu6DIwzx2CGMMrW3t3LZyJStWFCEpF2NuQiTJuajXd+7cpX01tVcv1rjDBgcH9dTTm3X8mxORhlibL7zyArA2quNkMqlNm5/RgQPvKZ1O/8vv1wvnVVX1gmpq35RzLgI+A5vRZXSFyu7ubt6u248EGzasZ3VJCROZDF1dXbS1tbO+rIzq6pdIJBJTjnBBbkPnHJ7nkU6n+eroMVpPtTIyMoLv+5SsLqGivJzS0gemAF7wgSRf4CuhzCwGk2BWw4MxxHWDMSaXyMVi43nefzSSLU7FiwD+TwD+BjQNwqGYm7zFAAAAAElFTkSuQmCC";
 
-var USERS={'ADM-MARCO':{nome:'Marco Antonio',cargo:'Socio Operacoes',tipo:'admin',cor:'#EA580C'},'ADM-EZEQUIEL':{nome:'Ezequiel Carvalho',cargo:'Socio Fundador',tipo:'admin',cor:'#0F172A'},'COM-LARA':{nome:'Lara Mendes',cargo:'Consultora Sudeste/Sul',tipo:'comercial',cor:'#1E40AF'},'COM-EDUARDO':{nome:'Eduardo Tavares',cargo:'Consultor Centro-Oeste',tipo:'comercial',cor:'#16A34A'},'COM-PATRICIA':{nome:'Patricia Coutinho',cargo:'Consultora Nordeste',tipo:'comercial',cor:'#7C3AED'}};
+var USERS={'ADM-MARCO':{nome:'Marco Antonio',cargo:'Sócio Operações',tipo:'admin',cor:'#EA580C'},'ADM-EZEQUIEL':{nome:'Ezequiel Carvalho',cargo:'Sócio Fundador',tipo:'admin',cor:'#0F172A'},'COM-LARA':{nome:'Lara Mendes',cargo:'Consultora Sudeste/Sul',tipo:'comercial',cor:'#1E40AF'},'COM-EDUARDO':{nome:'Eduardo Tavares',cargo:'Consultor Centro-Oeste',tipo:'comercial',cor:'#16A34A'},'COM-PATRICIA':{nome:'Patricia Coutinho',cargo:'Consultora Nordeste',tipo:'comercial',cor:'#7C3AED'}};
 function tokenEmail(tk){return tk.toLowerCase().replace(/\s/g,'')+'@agilihome.app'}
 function ini(n){return n.split(' ').map(function(x){return x[0]}).slice(0,2).join('').toUpperCase()}
 var SESSAO=null,CONV=null,FORMAL=false,_filtro='todos',_tk=null,_refs=[];
@@ -193,8 +259,22 @@ function $(id){return document.getElementById(id)}
 function ts(){return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}
 function toast(msg){var t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},2500)}
 
-function fillToken(t){$('in-token').value=t;stepToken()}
+/* ── NOTIFICAÇÕES ── */
+var _notifPerm=false;
+function pedirNotificacao(){
+  if(!('Notification' in window))return;
+  if(Notification.permission==='granted'){_notifPerm=true;return;}
+  if(Notification.permission!=='denied'){
+    Notification.requestPermission().then(function(p){_notifPerm=(p==='granted');});
+  }
+}
+function notificar(titulo,corpo){
+  if(!_notifPerm||document.visibilityState==='visible')return;
+  try{new Notification(titulo,{body:corpo,icon:'icon-192.png',badge:'icon-192.png',tag:'agili-msg',renotify:true});}catch(e){}
+}
 
+/* ── LOGIN ── */
+function fillToken(t){$('in-token').value=t;stepToken()}
 function stepToken(){
   var tk=$('in-token').value.trim().toUpperCase();
   var u=USERS[tk];
@@ -204,17 +284,13 @@ function stepToken(){
   $('step-token').classList.add('hi');
   showStep('step-login',u,'in-senha');
 }
-
 function showStep(stepId,u,focusId){
   var prefix=stepId==='step-login'?'log':'reg';
-  $(prefix+'-av').textContent=ini(u.nome);
-  $(prefix+'-av').style.background=u.cor;
-  $(prefix+'-nome').textContent=u.nome;
-  $(prefix+'-cargo').textContent=u.cargo;
+  $(prefix+'-av').textContent=ini(u.nome);$(prefix+'-av').style.background=u.cor;
+  $(prefix+'-nome').textContent=u.nome;$(prefix+'-cargo').textContent=u.cargo;
   $(stepId).classList.remove('hi');
   setTimeout(function(){if($(focusId))$(focusId).focus()},80);
 }
-
 function registrar(){
   var s=$('in-senha-nova')?$('in-senha-nova').value:'';
   if(!s||s.length<6){$('err-reg').style.display='block';return}
@@ -225,13 +301,12 @@ function registrar(){
     entrarNoApp(c.user.uid);
   }).catch(function(e){
     $('err-reg').style.display='block';
-    $('err-reg').textContent=e.code==='auth/email-already-in-use'?'Token ja registrado. Use a senha.':e.message;
+    $('err-reg').textContent=e.code==='auth/email-already-in-use'?'Token já registrado. Use a senha.':e.message;
   });
 }
-
 function logar(){
   var s=$('in-senha')?$('in-senha').value:'';
-  if(!s||s.length<6){$('err-log').style.display='block';$('err-log').textContent='Minimo 6 caracteres.';return}
+  if(!s||s.length<6){$('err-log').style.display='block';$('err-log').textContent='Mínimo 6 caracteres.';return}
   $('err-log').style.display='none';
   auth.signInWithEmailAndPassword(tokenEmail(_tk),s).then(function(c){
     entrarNoApp(c.user.uid);
@@ -245,61 +320,54 @@ function logar(){
         $('err-log').style.display='block';
         $('err-log').textContent=e2.code==='auth/email-already-in-use'?'Senha incorreta.':e2.message;
       });
-    }else{
-      $('err-log').style.display='block';
-      $('err-log').textContent='Senha incorreta.';
-    }
+    }else{$('err-log').style.display='block';$('err-log').textContent='Senha incorreta.';}
   });
 }
-
 function voltarToken(){
   _tk=null;
   ['step-register','step-login'].forEach(function(s){$(s).classList.add('hi')});
   $('step-token').classList.remove('hi');
 }
-
 function entrarNoApp(uid){
   var u=USERS[_tk];
   SESSAO={token:_tk,uid:uid,nome:u.nome,cargo:u.cargo,tipo:u.tipo,cor:u.cor};
   $('tela-login').style.display='none';
-  $('tela-main').classList.remove('hi');
-  $('tela-main').style.display='flex';
-  $('tela-main').style.flexDirection='column';
+  var tm=$('tela-main');tm.classList.remove('hi');tm.style.display='flex';tm.style.flexDirection='column';
   db.ref('status/'+uid).set({token:_tk,nome:u.nome,online:true,lastSeen:firebase.database.ServerValue.TIMESTAMP});
   db.ref('status/'+uid).onDisconnect().set({token:_tk,nome:u.nome,online:false,lastSeen:firebase.database.ServerValue.TIMESTAMP});
   criarGruposPadrao();
   renderLista();
+  pedirNotificacao();
+  if(SESSAO.tipo==='admin'){var bf=$('btn-formal');if(bf)bf.classList.remove('hi');}
+  escutarNovasMensagens();
 }
-
 function logout(){
   if(!confirm('Sair da conta?'))return;
   if(SESSAO)db.ref('status/'+SESSAO.uid).update({online:false});
-  auth.signOut();
-  SESSAO=null;CONV=null;
+  auth.signOut();SESSAO=null;CONV=null;
   _refs.forEach(function(fn){fn()});_refs=[];
   $('tela-main').style.display='none';
-  $('tela-chat').classList.add('hi');
-  $('tela-chat').style.display='none';
+  $('tela-chat').classList.add('hi');$('tela-chat').style.display='none';
   $('step-token').classList.remove('hi');
   ['step-register','step-login'].forEach(function(s){$(s).classList.add('hi')});
-  $('in-token').value='';
-  $('tela-login').style.display='flex';
+  $('in-token').value='';$('tela-login').style.display='flex';
 }
 
+/* ── GRUPOS PADRÃO ── */
 function criarGruposPadrao(){
   db.ref('grupos').once('value').then(function(s){
     if(s.exists())return;
     db.ref('grupos').set({
-      g_rede:{nome:'Rede agilihome',tipo:'grupo',cor:'#EA580C',membros:'todos'},
-      g_consul:{nome:'Consultores',tipo:'grupo',cor:'#1E40AF',membros:'equipe'},
-      g_ops:{nome:'Operacional',tipo:'grupo',cor:'#16A34A',membros:'equipe'}
+      g_rede:{nome:'Rede agilihome',tipo:'grupo',cor:'#EA580C',membros:'todos',criadorToken:'sistema'},
+      g_consul:{nome:'Consultores',tipo:'grupo',cor:'#1E40AF',membros:'equipe',criadorToken:'sistema'},
+      g_ops:{nome:'Operacional',tipo:'grupo',cor:'#16A34A',membros:'equipe',criadorToken:'sistema'}
     });
   });
 }
 
+/* ── LISTA DE CONVERSAS ── */
 function renderLista(){
-  var lista=$('lista-conv');
-  if(!lista)return;
+  var lista=$('lista-conv');if(!lista)return;
   lista.innerHTML='<div style="text-align:center;padding:20px;color:#94A3B8;font-size:13px">Carregando...</div>';
   db.ref('grupos').on('value',function(snap){
     var grupos=snap.val()||{};
@@ -314,7 +382,7 @@ function renderLista(){
       html+='<div class="cv" data-canal="'+id+'" data-nome="'+g.nome+'" data-cor="'+g.cor+'" data-tipo="'+g.tipo+'">';
       html+='<div class="cv-a" style="'+avSt+'">'+avInner+'</div>';
       html+='<div class="cv-b"><div class="cv-tp"><div class="cv-n">'+g.nome+'</div>';
-      html+='<div class="cv-t" id="t_'+id+'"></div></div>';
+      html+='<div style="display:flex;align-items:center;gap:6px"><div class="cv-badge" id="badge_'+id+'" style="display:none">1</div><div class="cv-t" id="t_'+id+'"></div></div></div>';
       html+='<div class="cv-p" id="p_'+id+'">...</div></div></div>';
     });
     if(SESSAO.tipo==='admin'&&(_filtro==='todos'||_filtro==='equipe')){
@@ -333,26 +401,58 @@ function renderLista(){
     lista.innerHTML=html||'<div style="text-align:center;padding:40px;color:#94A3B8;font-size:13px">Nenhuma conversa</div>';
     Object.keys(grupos).forEach(function(id){
       db.ref('mensagens/'+id).limitToLast(1).on('value',function(ms){
-        var msgs=ms.val();
-        if(!msgs)return;
+        var msgs=ms.val();if(!msgs)return;
         var m=Object.values(msgs)[0];
         var pEl=document.getElementById('p_'+id);
         var tEl=document.getElementById('t_'+id);
-        if(pEl)pEl.textContent=m.autorNome.split(' ')[0]+': '+m.texto.slice(0,40);
+        if(pEl)pEl.textContent=(m.formal?'📢 ':'')+m.autorNome.split(' ')[0]+': '+m.texto.slice(0,40);
         if(tEl)tEl.textContent=m.hora||'';
+        // Badge não lidas
+        var lastVisto=parseInt(localStorage.getItem('visto_'+id)||'0');
+        var badgeEl=document.getElementById('badge_'+id);
+        if(badgeEl){
+          if(m.timestamp&&m.timestamp>lastVisto&&m.autorToken!==SESSAO.token){
+            badgeEl.style.display='flex';
+          } else {
+            badgeEl.style.display='none';
+          }
+        }
       });
     });
   });
 }
 
-// Event delegation para clicks na lista
+/* ── ESCUTAR NOVAS MENSAGENS (notificação) ── */
+var _ultimoTs=Date.now();
+function escutarNovasMensagens(){
+  // Escuta grupos padrão + diretos do usuário
+  var canais=['g_rede','g_consul','g_ops'];
+  // diretos do admin com comerciais
+  if(SESSAO.tipo==='admin'){
+    Object.keys(USERS).forEach(function(tk){
+      if(USERS[tk].tipo==='comercial')
+        canais.push('dir_'+[SESSAO.token,tk].sort().join('_'));
+    });
+  }
+  canais.forEach(function(canal){
+    var ref=db.ref('mensagens/'+canal).orderByChild('timestamp').startAt(_ultimoTs+1);
+    ref.on('child_added',function(snap){
+      var m=snap.val();
+      if(!m||m.autorToken===SESSAO.token)return;
+      // Só notifica se não está olhando este canal agora
+      if(!CONV||CONV.canal!==canal){
+        notificar('agilihome · '+(m.formal?'Ato Formal':'Nova mensagem'),m.autorNome.split(' ')[0]+': '+m.texto.slice(0,80));
+        // Badge visual na lista (se implementado)
+      }
+    });
+  });
+}
+
+/* ── FILTROS ── */
 document.addEventListener('click',function(e){
   var cv=e.target.closest('.cv');
-  if(cv&&cv.dataset.canal){
-    abrirChat(cv.dataset.canal,cv.dataset.nome,cv.dataset.cor,cv.dataset.tipo);
-  }
+  if(cv&&cv.dataset.canal)abrirChat(cv.dataset.canal,cv.dataset.nome,cv.dataset.cor,cv.dataset.tipo);
 });
-
 function filtrar(tipo,btn){
   _filtro=tipo;
   document.querySelectorAll('.flt').forEach(function(f){f.className='flt flt-i'});
@@ -369,10 +469,81 @@ function toggleSearch(){
   $('search-bar').classList.toggle('hi');
   if(!$('search-bar').classList.contains('hi')&&$('in-search'))$('in-search').focus();
 }
-function novaConversa(){toast('Em breve: criar grupos')}
 
+/* ── NAV TABS ── */
+function navTab(tab){
+  ['conv','perf'].forEach(function(t){
+    document.getElementById('nb-'+t).classList.toggle('active',t===tab);
+  });
+  if(tab==='conv'){renderLista();}
+  else if(tab==='perf'){mostrarPerfil();}
+}
+
+function mostrarPerfil(){
+  if(!SESSAO)return;
+  var lista=$('lista-conv');
+  lista.innerHTML='<div style="padding:24px;display:flex;flex-direction:column;align-items:center;gap:16px">'
+    +'<div style="width:72px;height:72px;border-radius:50%;background:'+SESSAO.cor+';display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:22px">'+ini(SESSAO.nome)+'</div>'
+    +'<div style="text-align:center"><div style="font-size:18px;font-weight:800;color:#0F172A">'+SESSAO.nome+'</div><div style="font-size:13px;color:#94A3B8;margin-top:2px">'+SESSAO.cargo+'</div></div>'
+    +'<div style="background:#F8FAFC;border-radius:12px;padding:14px 18px;width:100%;font-size:13px;color:#475569">'
+    +'<div style="margin-bottom:6px"><b style="color:#0F172A">Token:</b> '+SESSAO.token+'</div>'
+    +'<div><b style="color:#0F172A">Tipo:</b> '+SESSAO.tipo+'</div></div>'
+    +'<button onclick="logout()" style="width:100%;padding:12px;border-radius:12px;border:1.5px solid #FEE2E2;background:#FFF5F5;color:#DC2626;font-size:14px;font-weight:700;cursor:pointer">Sair da conta</button>'
+    +'</div>';
+}
+
+/* ── MODAL CRIAR GRUPO ── */
+var _membrosSel={};
+function abrirModalGrupo(){
+  _membrosSel={};
+  $('grupo-nome').value='';
+  var lista=$('membros-list');
+  lista.innerHTML='';
+  // Todos os usuários menos o próprio
+  Object.keys(USERS).forEach(function(tk){
+    if(tk===SESSAO.token)return;
+    var u=USERS[tk];
+    var div=document.createElement('div');
+    div.className='membro-item';div.dataset.tk=tk;
+    div.innerHTML='<div class="membro-av" style="background:'+u.cor+'">'+ini(u.nome)+'</div>'
+      +'<div class="membro-nome">'+u.nome+'<br><span style="font-size:11px;color:#94A3B8;font-weight:400">'+u.cargo+'</span></div>'
+      +'<div class="membro-chk" id="chk-'+tk+'"></div>';
+    div.addEventListener('click',function(){
+      if(_membrosSel[tk]){delete _membrosSel[tk];div.classList.remove('sel');}
+      else{_membrosSel[tk]=true;div.classList.add('sel');}
+    });
+    lista.appendChild(div);
+  });
+  $('modal-grupo').classList.remove('hi');
+}
+function fecharModalGrupo(){$('modal-grupo').classList.add('hi')}
+function criarGrupo(){
+  var nome=$('grupo-nome').value.trim();
+  if(!nome){toast('Digite um nome para o grupo');return;}
+  var membros=Object.keys(_membrosSel);
+  if(membros.length===0){toast('Selecione ao menos um membro');return;}
+  // Gerar ID único
+  var id='g_'+Date.now();
+  var cor=['#1E40AF','#7C3AED','#16A34A','#EA580C','#0F172A'][Math.floor(Math.random()*5)];
+  var dadosGrupo={
+    nome:nome,tipo:'grupo',cor:cor,
+    criadorToken:SESSAO.token,
+    membros:JSON.stringify([SESSAO.token].concat(membros)),
+    criadoEm:new Date().toISOString()
+  };
+  db.ref('grupos/'+id).set(dadosGrupo).then(function(){
+    fecharModalGrupo();
+    toast('Grupo "'+nome+'" criado!');
+    renderLista();
+  }).catch(function(e){toast('Erro: '+e.message);});
+}
+
+/* ── CHAT ── */
 function abrirChat(canal,nome,cor,tipo){
   CONV={canal:canal,nome:nome,cor:cor,tipo:tipo};
+  localStorage.setItem('visto_'+canal, Date.now());
+  var badgeEl=document.getElementById('badge_'+canal);
+  if(badgeEl)badgeEl.style.display='none';
   var av=$('ch-avatar');
   if(canal==='g_rede'){
     av.innerHTML='<img src="data:image/png;base64,'+LOGO32+'" alt="" style="width:100%;height:100%;border-radius:50%">';
@@ -383,27 +554,32 @@ function abrirChat(canal,nome,cor,tipo){
   }
   $('ch-nome').textContent=nome;
   $('ch-sub').textContent=(tipo==='grupo')?'Grupo':'Conversa direta';
-  $('tela-chat').classList.remove('hi');
-  $('tela-chat').style.display='flex';
-  $('tela-chat').style.flexDirection='column';
+  var tc=$('tela-chat');tc.classList.remove('hi');tc.style.display='flex';tc.style.flexDirection='column';
   var area=$('msgs-area');
   area.innerHTML='<div style="flex:1;display:flex;align-items:center;justify-content:center;color:#94A3B8;font-size:13px">Carregando...</div>';
   _refs.forEach(function(fn){fn()});_refs=[];
   var ref=db.ref('mensagens/'+canal).limitToLast(100);
   var handler=ref.on('value',function(snap){
     var msgs=snap.val();
-    if(!msgs){area.innerHTML='<div style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:#94A3B8;font-size:13px">Nenhuma mensagem ainda</div>';return}
+    if(!msgs){area.innerHTML='<div style="flex:1;display:flex;align-items:center;justify-content:center;color:#94A3B8;font-size:13px">Nenhuma mensagem ainda</div>';return}
     var html='',lastD='';
     Object.values(msgs).forEach(function(m){
       var d=m.data||'';
       if(d!==lastD){lastD=d;html+='<div class="date-sep">'+(d===new Date().toLocaleDateString('pt-BR')?'Hoje':d)+'</div>';}
       var mine=(m.autorToken===SESSAO.token);
-      var cls=m.formal?'msg msg-formal':(mine?'msg msg-out':'msg msg-in');
+      var cls=m.formal?(mine?'msg msg-formal-out':'msg msg-formal-in'):(mine?'msg msg-out':'msg msg-in');
       html+='<div class="'+cls+'">';
-      if(m.formal)html+='<div class="msg-ft">&#9878; Ato formal</div>';
-      if(!mine||m.formal)html+='<div class="msg-au"'+(m.formal?' style="color:#C2410C"':'')+'>'+m.autorNome+'</div>';
-      html+=m.texto;
-      html+='<div class="'+(mine&&!m.formal?'msg-tmo':'msg-tm')+'">'+(m.hora||'')+(mine?' &#10003;&#10003;':'')+'</div></div>';
+      if(m.formal){
+        html+='<div style="display:flex;align-items:center;gap:5px;margin-bottom:6px">';
+        html+='<span style="background:#EA580C;color:#fff;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:4px">&#9878; Comunicado Oficial</span>';
+        html+='</div>';
+        if(!mine)html+='<div style="font-size:10px;font-weight:600;color:#C2410C;margin-bottom:4px">'+m.autorNome+'</div>';
+        html+='<div style="font-size:13.5px;line-height:1.5;color:#0F172A">'+m.texto+'</div>';
+      } else {
+        if(!mine)html+='<div class="msg-au">'+m.autorNome+'</div>';
+        html+=m.texto;
+      }
+      html+='<div style="font-size:9px;margin-top:2px;text-align:right;color:'+(mine?'#94A3B8':'#94A3B8')+'">'+(m.hora||'')+(mine?' &#10003;&#10003;':'')+'</div></div>';
     });
     area.innerHTML=html;
     setTimeout(function(){area.scrollTop=area.scrollHeight},30);
@@ -411,14 +587,10 @@ function abrirChat(canal,nome,cor,tipo){
   _refs.push(function(){ref.off('value',handler)});
   if($('in-msg'))$('in-msg').focus();
 }
-
 function voltarLista(){
-  $('tela-chat').style.display='none';
-  $('tela-chat').classList.add('hi');
-  CONV=null;
-  _refs.forEach(function(fn){fn()});_refs=[];
+  $('tela-chat').style.display='none';$('tela-chat').classList.add('hi');
+  CONV=null;_refs.forEach(function(fn){fn()});_refs=[];
 }
-
 function enviar(){
   var input=$('in-msg');
   var texto=input?input.value.trim():'';
@@ -431,15 +603,17 @@ function enviar(){
   });
   input.value='';input.style.height='auto';
   if(FORMAL)toggleFormal();
+  
 }
 
 function toggleFormal(){
   FORMAL=!FORMAL;
   $('btn-formal').classList.toggle('active',FORMAL);
-  $('in-msg').placeholder=FORMAL?'Mensagem formal (registro juridico)...':'Mensagem...';
+  $('in-msg').placeholder=FORMAL?'Comunicado oficial (registro jurídico)...':'Mensagem...';
 }
 function autoResize(e){e.style.height='auto';e.style.height=Math.min(e.scrollHeight,100)+'px'}
 
+/* ── AUTO LOGIN ── */
 auth.onAuthStateChanged(function(user){
   if(!user)return;
   db.ref('usuarios/'+user.uid).once('value').then(function(snap){
