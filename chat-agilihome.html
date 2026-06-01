@@ -466,10 +466,19 @@ function entrarDireto(tk){
   var uid='demo_'+tk.toLowerCase().replace(/[^a-z0-9]/g,'_');
   SESSAO={token:tk,uid:uid,nome:u.nome,cargo:u.cargo,tipo:u.tipo,cor:u.cor};
   $('tela-login').style.display='none';
-  // Carregar foto do Firebase
-  db.ref('usuarios/'+uid+'/foto').once('value').then(function(s){if(s.val())SESSAO.foto=s.val();});
-  // Carregar nome personalizado
-  db.ref('usuarios/'+uid+'/nome').once('value').then(function(s){if(s.val())SESSAO.nome=s.val();});
+  // Carregar foto e nome do próprio usuário do Firebase
+  db.ref('usuarios/'+uid).once('value').then(function(s){
+    var d=s.val()||{};
+    if(d.foto)SESSAO.foto=d.foto;
+    if(d.nome)SESSAO.nome=d.nome;
+    // Atualizar avatar no header do chat se já estiver aberto
+    if(CONV&&CONV.canal){
+      var chAv=$('ch-avatar');
+      if(chAv&&CONV.tipo==='direto'){
+        // já está carregando foto do outro — não sobrescrever
+      }
+    }
+  });
   var tm=$('tela-main');tm.classList.remove('hi');tm.style.display='flex';tm.style.flexDirection='column';
   // Status online
   db.ref('status/'+uid).set({token:tk,nome:u.nome,online:true,ultimo:firebase.database.ServerValue.TIMESTAMP});
@@ -479,7 +488,6 @@ function entrarDireto(tk){
   renderLista();
   pedirNotificacao();
   escutarNovas();
-  registrarSW();
 }
 
 function logout(){
@@ -495,8 +503,18 @@ function logout(){
 /* ── NOTIFICAÇÕES ── */
 function pedirNotificacao(){
   if(!('Notification' in window))return;
-  if(Notification.permission==='granted'){_notifPerm=true;return;}
-  if(Notification.permission!=='denied')Notification.requestPermission().then(function(p){_notifPerm=(p==='granted');});
+  if(Notification.permission==='granted'){
+    _notifPerm=true;
+    // Já tem permissão — registrar SW imediatamente
+    setTimeout(registrarSW, 500);
+    return;
+  }
+  if(Notification.permission!=='denied'){
+    Notification.requestPermission().then(function(p){
+      _notifPerm=(p==='granted');
+      if(_notifPerm)setTimeout(registrarSW, 500);
+    });
+  }
 }
 function notificar(titulo,corpo){
   tocarSom();incrementarBadge();
@@ -519,16 +537,54 @@ function tocarSom(){
 document.addEventListener('touchstart',function desbloq(){try{var ctx=new(window.AudioContext||window.webkitAudioContext)();ctx.resume();}catch(e){}document.removeEventListener('touchstart',desbloq);},{once:true});
 
 function registrarSW(){
-  if(!('serviceWorker' in navigator))return;
-  navigator.serviceWorker.register('/agilihome/sw.js').then(function(reg){
+  if(!('serviceWorker' in navigator)||!('PushManager' in window))return;
+  // Registrar SW e manter subscription persistente
+  navigator.serviceWorker.register('/agilihome/sw.js',{updateViaCache:'none'}).then(function(reg){
     _swReg=reg;
+    // Forçar update do SW se houver versão nova
+    reg.update();
+    // Aguardar SW ficar ativo
+    if(reg.installing){
+      return new Promise(function(resolve){
+        reg.installing.addEventListener('statechange',function(){
+          if(this.state==='activated')resolve(reg);
+        });
+      });
+    }
+    return reg;
+  }).then(function(reg){
+    if(!reg)return;
+    // Verificar permissão
+    if(Notification.permission!=='granted')return;
+    // Buscar subscription existente primeiro
     return reg.pushManager.getSubscription().then(function(sub){
-      if(sub)return sub;
-      return reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64(VAPID)});
+      if(sub){
+        // Já tem subscription — só salvar no Firebase
+        db.ref('fcm_tokens/'+SESSAO.token).set({
+          subscription:JSON.stringify(sub),
+          token:SESSAO.token,
+          nome:SESSAO.nome,
+          ts:Date.now(),
+          ua:navigator.userAgent
+        });
+        return sub;
+      }
+      // Criar nova subscription
+      return reg.pushManager.subscribe({
+        userVisibleOnly:true,
+        applicationServerKey:urlBase64(VAPID)
+      }).then(function(newSub){
+        db.ref('fcm_tokens/'+SESSAO.token).set({
+          subscription:JSON.stringify(newSub),
+          token:SESSAO.token,
+          nome:SESSAO.nome,
+          ts:Date.now(),
+          ua:navigator.userAgent
+        });
+        return newSub;
+      });
     });
-  }).then(function(sub){
-    if(sub)db.ref('fcm_tokens/'+SESSAO.token).set({subscription:JSON.stringify(sub),ts:Date.now()});
-  }).catch(function(){});
+  }).catch(function(e){console.log('SW erro:',e);});
 }
 function urlBase64(b64){var pad='='.repeat((4-b64.length%4)%4);var raw=atob((b64+pad).replace(/-/g,'+').replace(/_/g,'/'));var arr=new Uint8Array(raw.length);for(var i=0;i<raw.length;i++)arr[i]=raw.charCodeAt(i);return arr;}
 
@@ -885,14 +941,18 @@ function abrirChat(canal,nome,cor,tipo){
   // Avatar
   var av=$('ch-avatar');
   av.style.background=cor;av.textContent=ini(nome);
-  // Carregar foto se direto
+  // Carregar foto do outro (header)
   if(tipo==='direto'){
     var otherTk=canal.replace('dir_','').replace(SESSAO.token+'_','').replace('_'+SESSAO.token,'');
-    var uid='demo_'+otherTk.toLowerCase().replace(/[^a-z0-9]/g,'_');
-    db.ref('usuarios/'+uid+'/foto').once('value').then(function(s){
+    var otherUid='demo_'+otherTk.toLowerCase().replace(/[^a-z0-9]/g,'_');
+    db.ref('usuarios/'+otherUid+'/foto').once('value').then(function(s){
       if(s.val())av.innerHTML='<img src="'+s.val()+'" alt="">';
     });
   }
+  // Garantir foto do SESSAO atualizada
+  db.ref('usuarios/'+SESSAO.uid+'/foto').once('value').then(function(s){
+    if(s.val())SESSAO.foto=s.val();
+  });
   $('ch-nome').textContent=nome;
   $('ch-sub').textContent=tipo==='grupo'?'Grupo':'Conversa direta';
   // Msg fixada
@@ -905,6 +965,8 @@ function abrirChat(canal,nome,cor,tipo){
   var tc=$('tela-chat');tc.classList.remove('hi');tc.style.display='flex';tc.style.flexDirection='column';
   _refs.forEach(function(fn){fn();});_refs=[];
   var area=$('msgs-area');area.innerHTML='<div style="text-align:center;padding:24px;color:var(--gray-400);font-size:13px">Carregando...</div>';
+  // Pré-carregar fotos de todos os membros para o cache
+  Object.keys(USERS).forEach(function(tk){_getFoto(tk,function(){});});
   var ref=db.ref('mensagens/'+canal).limitToLast(100);
   var handler=ref.on('value',function(snap){
     var msgs=snap.val();
@@ -925,11 +987,38 @@ function abrirChat(canal,nome,cor,tipo){
   setTimeout(function(){if($('in-msg'))$('in-msg').focus();},200);
 }
 
+/* Cache de fotos para não buscar toda vez */
+var _fotoCache={};
+function _getFoto(token,callback){
+  if(_fotoCache[token]!==undefined){callback(_fotoCache[token]);return;}
+  var uid='demo_'+token.toLowerCase().replace(/[^a-z0-9]/g,'_');
+  db.ref('usuarios/'+uid+'/foto').once('value').then(function(s){
+    _fotoCache[token]=s.val()||null;
+    callback(_fotoCache[token]);
+  });
+}
+function _avHtml(token,nome,cor,size){
+  size=size||28;
+  var foto=(token===SESSAO.token)?SESSAO.foto:(_fotoCache[token]||null);
+  if(foto)return '<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;overflow:hidden;flex-shrink:0"><img src="'+foto+'" style="width:100%;height:100%;object-fit:cover"></div>';
+  return '<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+cor+';display:flex;align-items:center;justify-content:center;font-weight:700;font-size:'+(size*0.35)+'px;color:#fff;flex-shrink:0">'+ini(nome)+'</div>';
+}
+
 function _renderMsg(mid,m){
   var mine=(m.autorToken===SESSAO.token);
   var wrapCls='msg-wrap '+(mine?'mine':'theirs');
   var msgCls='msg '+(m.formal?'formal '+(mine?'mine':''):(mine?'mine':'theirs'));
-  var html='<div class="'+wrapCls+'" data-mid="'+mid+'">';
+  // Avatar do remetente
+  var u=USERS[m.autorToken]||{nome:m.autorNome,cor:'#94A3B8'};
+  var avHtml=_avHtml(m.autorToken,m.autorNome,u.cor,28);
+  var html='<div style="display:flex;align-items:flex-end;gap:6px;'+(mine?'flex-direction:row-reverse':'')+'" data-mid="'+mid+'">';
+  // Avatar — mostrar sempre (grupos) ou em diretos
+  if(!m.formal){
+    html+=avHtml;
+  } else {
+    html+='<div style="width:28px;flex-shrink:0"></div>';
+  }
+  html+='<div class="'+wrapCls+'" data-mid="'+mid+'">';
   // Autor (grupos)
   if(CONV&&CONV.tipo==='grupo'&&!mine&&!m.formal){
     html+='<div class="msg-au">'+m.autorNome.split(' ')[0]+'</div>';
@@ -969,6 +1058,7 @@ function _renderMsg(mid,m){
     }
   }
   html+='</div>';
+  html+='</div>'; // fecha flex container
   return html;
 }
 

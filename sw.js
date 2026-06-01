@@ -1,5 +1,5 @@
-/* agilihome Service Worker — auto-update */
-var CACHE = 'agilihome-v' + Date.now(); // versão única a cada deploy
+/* agilihome Service Worker v4 */
+var CACHE = 'agilihome-v4'; // versão FIXA — mudar manualmente a cada deploy importante
 var URLS = [
   '/agilihome/chat-agilihome.html',
   '/agilihome/manifest.json',
@@ -11,7 +11,7 @@ self.addEventListener('install', function(e) {
   e.waitUntil(
     caches.open(CACHE).then(function(c) { return c.addAll(URLS); })
   );
-  self.skipWaiting(); // ativa imediatamente sem esperar fechar
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', function(e) {
@@ -21,51 +21,52 @@ self.addEventListener('activate', function(e) {
         ks.filter(function(k) { return k !== CACHE; })
           .map(function(k) { return caches.delete(k); })
       );
-    }).then(function() {
-      return self.clients.claim(); // assume controle de todas as abas
-    })
+    }).then(function() { return self.clients.claim(); })
   );
 });
 
-/* Network first — sempre busca versão nova, cache só como fallback */
+/* Network first — busca sempre versão nova */
 self.addEventListener('fetch', function(e) {
+  if(e.request.method !== 'GET') return;
   e.respondWith(
     fetch(e.request).then(function(res) {
-      // Atualizar cache com versão nova
-      var resClone = res.clone();
-      caches.open(CACHE).then(function(c) { c.put(e.request, resClone); });
+      var clone = res.clone();
+      caches.open(CACHE).then(function(c) { c.put(e.request, clone); });
       return res;
-    }).catch(function() {
-      return caches.match(e.request);
-    })
+    }).catch(function() { return caches.match(e.request); })
   );
 });
 
-/* Push notifications */
+/* Push — recebe mesmo com app fechado */
 self.addEventListener('push', function(e) {
   var data = {};
   try { data = e.data ? e.data.json() : {}; } catch(err) {}
   e.waitUntil(
-    self.registration.showNotification(data.titulo || 'agilihome', {
+    self.registration.showNotification(data.titulo || 'agilihome Chat', {
       body: data.corpo || 'Nova mensagem',
       icon: '/agilihome/icon-192.png',
       badge: '/agilihome/icon-192.png',
-      tag: 'agili-msg', renotify: true,
+      tag: 'agili-' + (data.canal || 'msg'),
+      renotify: true,
       vibrate: [200, 100, 200],
-      data: { url: '/agilihome/chat-agilihome.html' }
+      silent: false,
+      data: { url: '/agilihome/chat-agilihome.html', canal: data.canal }
     })
   );
 });
 
-/* Clique na notificação — abre o app */
+/* Clique na notificação */
 self.addEventListener('notificationclick', function(e) {
   e.notification.close();
+  var url = '/agilihome/chat-agilihome.html';
   e.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(cs) {
       for (var i = 0; i < cs.length; i++) {
-        if (cs[i].url.indexOf('agilihome') !== -1 && 'focus' in cs[i]) return cs[i].focus();
+        if (cs[i].url.indexOf('agilihome') !== -1 && 'focus' in cs[i]) {
+          return cs[i].focus();
+        }
       }
-      if (clients.openWindow) return clients.openWindow('/agilihome/chat-agilihome.html');
+      if (clients.openWindow) return clients.openWindow(url);
     })
   );
 });
