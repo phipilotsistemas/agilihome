@@ -124,6 +124,11 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .msg-formal-in{align-self:flex-start;background:#FFF7ED;border:2px solid #EA580C;color:#0F172A;border-bottom-left-radius:4px}
 
 .cv-badge{min-width:20px;height:20px;border-radius:10px;background:#EA580C;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 5px;flex-shrink:0}
+
+.cv{position:relative}
+.cv-del{position:absolute;right:0;top:0;bottom:0;width:70px;background:#EF4444;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;cursor:pointer;opacity:0;transition:opacity .2s}
+.cv:hover .cv-del{opacity:1}
+.cv-del-icon{display:flex;flex-direction:column;align-items:center;gap:3px}
 ::-webkit-scrollbar{width:0}
 </style>
 </head>
@@ -405,11 +410,14 @@ function renderLista(){
       var isLogo=(id==='g_rede');
       var avInner=isLogo?'<img src="icon-192.png" alt="" style="width:100%;height:100%;object-fit:cover">':ini(g.nome);
       var avSt=isLogo?'background:#fff;border:2px solid #EA580C':'background:'+g.cor;
+      var podeExcluir=(g.criadorToken===SESSAO.token&&id!=='g_rede'&&id!=='g_consul'&&id!=='g_ops');
       html+='<div class="cv" data-canal="'+id+'" data-nome="'+g.nome+'" data-cor="'+g.cor+'" data-tipo="'+g.tipo+'">';
       html+='<div class="cv-a" style="'+avSt+'">'+avInner+'</div>';
       html+='<div class="cv-b"><div class="cv-tp"><div class="cv-n">'+g.nome+'</div>';
       html+='<div style="display:flex;align-items:center;gap:6px"><div class="cv-badge" id="badge_'+id+'" style="display:none">1</div><div class="cv-t" id="t_'+id+'"></div></div></div>';
-      html+='<div class="cv-p" id="p_'+id+'">...</div></div></div>';
+      html+='<div class="cv-p" id="p_'+id+'">...</div></div>';
+      if(podeExcluir)html+='<div class="cv-del" data-del="'+id+'" data-nome="'+g.nome+'"><div class="cv-del-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg><span>Excluir</span></div></div>';
+      html+='</div>';
     });
     if(SESSAO.tipo==='admin'&&(_filtro==='todos'||_filtro==='equipe')){
       Object.keys(USERS).forEach(function(tk){
@@ -434,7 +442,9 @@ function renderLista(){
         html+='<div class="cv-a" style="background:'+u.cor+'">'+ini(u.nome)+'</div>';
         html+='<div class="cv-b"><div class="cv-tp"><div class="cv-n">'+u.nome+'</div>';
         html+='<div style="display:flex;align-items:center;gap:6px"><div class="cv-badge" id="badge_'+cid+'" style="display:none">1</div><div class="cv-t" id="t_'+cid+'"></div></div></div>';
-        html+='<div class="cv-p" id="p_'+cid+'">Conversa direta</div></div></div>';
+        html+='<div class="cv-p" id="p_'+cid+'">Conversa direta</div></div>';
+        html+='<div class="cv-del" data-del="'+cid+'" data-nome="'+u.nome+'"><div class="cv-del-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg><span>Limpar</span></div></div>';
+        html+='</div>';
       });
     }
     lista.innerHTML=html||'<div style="text-align:center;padding:40px;color:#94A3B8;font-size:13px">Nenhuma conversa</div>';
@@ -487,6 +497,14 @@ function escutarNovasMensagens(){
 
 /* ── FILTROS ── */
 document.addEventListener('click',function(e){
+  // Botão excluir
+  var del=e.target.closest('.cv-del');
+  if(del&&del.dataset.del){
+    e.stopPropagation();
+    excluirConversa(del.dataset.del,del.dataset.nome);
+    return;
+  }
+  // Abrir chat
   var cv=e.target.closest('.cv');
   if(cv&&cv.dataset.canal)abrirChat(cv.dataset.canal,cv.dataset.nome,cv.dataset.cor,cv.dataset.tipo);
 });
@@ -731,6 +749,28 @@ function urlBase64ToUint8Array(base64String){
   var arr=new Uint8Array(raw.length);
   for(var i=0;i<raw.length;i++){arr[i]=raw.charCodeAt(i);}
   return arr;
+}
+
+
+/* ── EXCLUIR / LIMPAR CONVERSA ── */
+function excluirConversa(canal,nome){
+  var isGrupo=!canal.startsWith('dir_');
+  var msg=isGrupo
+    ?'Excluir o grupo "'+nome+'"? As mensagens serão apagadas para todos.'
+    :'Limpar o histórico da conversa com '+nome+'? As mensagens serão apagadas.';
+  if(!confirm(msg))return;
+  // Apagar mensagens
+  db.ref('mensagens/'+canal).remove();
+  // Se for grupo criado pelo usuário, apagar o grupo também
+  if(isGrupo){
+    db.ref('grupos/'+canal).once('value').then(function(s){
+      var g=s.val();
+      if(g&&g.criadorToken===SESSAO.token){
+        db.ref('grupos/'+canal).remove();
+      }
+    });
+  }
+  toast(isGrupo?'Grupo excluído':'Conversa limpa');
 }
 
 /* ── AUTO LOGIN ── */
