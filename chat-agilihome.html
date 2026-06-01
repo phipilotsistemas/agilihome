@@ -58,12 +58,12 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .cv-bg{min-width:20px;height:20px;border-radius:10px;background:#EA580C;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px;flex-shrink:0}
 
 /* FAB — posicionado acima do bnav fixo */
-.fab{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 72px);right:calc(50% - 215px + 16px);width:50px;height:50px;border-radius:50%;background:#EA580C;border:none;display:flex;align-items:center;justify-content:center;color:#fff;font-size:26px;box-shadow:0 4px 14px rgba(234,88,12,.4);cursor:pointer;z-index:10}
+.fab{position:fixed;bottom:calc(max(env(safe-area-inset-bottom,20px),20px) + 68px);right:calc(50% - 215px + 16px);width:50px;height:50px;border-radius:50%;background:#EA580C;border:none;display:flex;align-items:center;justify-content:center;color:#fff;font-size:26px;box-shadow:0 4px 14px rgba(234,88,12,.4);cursor:pointer;z-index:10}
 .fab:active{transform:scale(.93)}
 @media(max-width:430px){.fab{right:16px}}
 
 /* BOTTOM NAV — sempre fixo */
-.bnav{display:flex;background:#fff;border-top:1px solid #E2E8F0;padding:10px 0 calc(env(safe-area-inset-bottom,0px) + 10px);flex-shrink:0}
+.bnav{display:flex;background:#fff;border-top:1px solid #E2E8F0;padding:10px 0 max(env(safe-area-inset-bottom,20px),20px);flex-shrink:0;padding-bottom:max(env(safe-area-inset-bottom,20px),20px)}
 .nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;font-weight:600;color:#94A3B8;cursor:pointer;border:none;background:none}
 .nb.active{color:#EA580C}
 .nb svg{width:26px;height:26px}
@@ -125,9 +125,9 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 
 .cv-badge{min-width:20px;height:20px;border-radius:10px;background:#EA580C;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 5px;flex-shrink:0}
 
-.cv{position:relative}
-.cv-del{position:absolute;right:0;top:0;bottom:0;width:70px;background:#EF4444;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;cursor:pointer;opacity:0;transition:opacity .2s}
-.cv:hover .cv-del{opacity:1}
+.cv{position:relative;overflow:hidden;transition:transform .2s}
+.cv-del{position:absolute;right:0;top:0;bottom:0;width:80px;background:#EF4444;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;cursor:pointer;transform:translateX(80px);transition:transform .25s}
+.cv.swipe-open .cv-del{transform:translateX(0)}
 .cv-del-icon{display:flex;flex-direction:column;align-items:center;gap:3px}
 
 .perfil-wrap{padding:24px;display:flex;flex-direction:column;align-items:center;gap:16px}
@@ -565,9 +565,9 @@ function mostrarPerfil(){
     :'<span>'+ini(SESSAO.nome)+'</span>';
   lista.innerHTML='<div class="perfil-wrap">'
     +'<input type="file" id="input-foto" accept="image/*" onchange="trocarFoto(this)">'
-    +'<div class="perfil-av-wrap" onclick="abrirSeletorFoto()">'
+    +'<label for="input-foto" style="cursor:pointer"><div class="perfil-av-wrap">'
     +'<div class="perfil-av" style="background:'+SESSAO.cor+'">'+avHtml+'</div>'
-    +'<div class="perfil-av-edit"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>'
+    +'<div class="perfil-av-edit"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div></div></label>'
     +'</div>'
     +'<div style="text-align:center;width:100%">'
     +'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94A3B8;margin-bottom:6px">Seu nome</div>'
@@ -582,7 +582,6 @@ function mostrarPerfil(){
     +'</div>';
 }
 
-function abrirSeletorFoto(){var el=document.getElementById("input-foto");if(el)el.click();}
 function trocarFoto(input){
   var file=input.files[0];
   if(!file)return;
@@ -829,6 +828,37 @@ function urlBase64ToUint8Array(base64String){
   return arr;
 }
 
+
+
+/* ── SWIPE TO DELETE ── */
+var _swipeStart={x:0,y:0,el:null};
+document.addEventListener('touchstart',function(e){
+  var cv=e.target.closest('.cv');
+  if(!cv||!cv.querySelector('.cv-del'))return;
+  _swipeStart={x:e.touches[0].clientX,y:e.touches[0].clientY,el:cv};
+},{passive:true});
+document.addEventListener('touchend',function(e){
+  if(!_swipeStart.el)return;
+  var dx=e.changedTouches[0].clientX-_swipeStart.x;
+  var dy=Math.abs(e.changedTouches[0].clientY-_swipeStart.y);
+  var el=_swipeStart.el;
+  _swipeStart={x:0,y:0,el:null};
+  if(dy>30)return; // scroll vertical, ignora
+  if(dx<-50){
+    // Swipe esquerda — abrir
+    document.querySelectorAll('.cv.swipe-open').forEach(function(c){if(c!==el)c.classList.remove('swipe-open');});
+    el.classList.add('swipe-open');
+  } else if(dx>20){
+    // Swipe direita — fechar
+    el.classList.remove('swipe-open');
+  }
+},{passive:true});
+// Fechar swipe ao clicar fora
+document.addEventListener('touchstart',function(e){
+  if(!e.target.closest('.cv')){
+    document.querySelectorAll('.cv.swipe-open').forEach(function(c){c.classList.remove('swipe-open');});
+  }
+},{passive:true});
 
 /* ── EXCLUIR / LIMPAR CONVERSA ── */
 function excluirConversa(canal,nome){
