@@ -527,14 +527,45 @@ function urlBase64(b64){var pad='='.repeat((4-b64.length%4)%4);var raw=atob((b64
 
 var _ultimoTs=Date.now();
 function escutarNovas(){
-  var canais=['g_rede','g_consul','g_ops'];
-  Object.keys(USERS).forEach(function(tk){if(tk!==SESSAO.token)canais.push('dir_'+[SESSAO.token,tk].sort().join('_'));});
-  canais.forEach(function(canal){
+  // Escutar todos os canais diretos possíveis
+  Object.keys(USERS).forEach(function(tk){
+    if(tk===SESSAO.token)return;
+    var canal='dir_'+[SESSAO.token,tk].sort().join('_');
     var ref=db.ref('mensagens/'+canal).orderByChild('timestamp').startAt(_ultimoTs+1);
     ref.on('child_added',function(snap){
       var m=snap.val();
       if(!m||m.autorToken===SESSAO.token)return;
-      if(!CONV||CONV.canal!==canal)notificar('agilihome · '+(m.formal?'Comunicado':'Nova mensagem'),m.autorNome.split(' ')[0]+': '+(m.texto||'📎 Imagem').slice(0,80));
+      // Se estava oculto, remover dos ocultos para aparecer na lista
+      _remOculto(canal);
+      // Atualizar lista para mostrar a conversa
+      var card=document.querySelector('.cv[data-canal="'+canal+'"]');
+      if(!card){
+        // Conversa não está na lista — re-renderizar para aparecer
+        renderLista();
+      }
+      // Notificar
+      if(!CONV||CONV.canal!==canal){
+        notificar('agilihome · '+(m.formal?'Comunicado':'Nova mensagem'),m.autorNome.split(' ')[0]+': '+(m.texto||'📎 Imagem').slice(0,80));
+        // Badge visual
+        var badgeEl=document.getElementById('badge_'+canal);
+        if(badgeEl)badgeEl.style.display='flex';
+      }
+    });
+  });
+  // Escutar grupos também
+  db.ref('grupos').once('value').then(function(snap){
+    var gs=snap.val()||{};
+    Object.keys(gs).forEach(function(id){
+      var ref=db.ref('mensagens/'+id).orderByChild('timestamp').startAt(_ultimoTs+1);
+      ref.on('child_added',function(snap){
+        var m=snap.val();
+        if(!m||m.autorToken===SESSAO.token)return;
+        if(!CONV||CONV.canal!==id){
+          notificar('agilihome · '+(m.formal?'Comunicado':'Nova mensagem'),m.autorNome.split(' ')[0]+': '+(m.texto||'📎 Imagem').slice(0,80));
+          var badgeEl=document.getElementById('badge_'+id);
+          if(badgeEl)badgeEl.style.display='flex';
+        }
+      });
     });
   });
 }
