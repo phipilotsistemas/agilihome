@@ -129,6 +129,19 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .cv-del{position:absolute;right:0;top:0;bottom:0;width:70px;background:#EF4444;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;cursor:pointer;opacity:0;transition:opacity .2s}
 .cv:hover .cv-del{opacity:1}
 .cv-del-icon{display:flex;flex-direction:column;align-items:center;gap:3px}
+
+.perfil-wrap{padding:24px;display:flex;flex-direction:column;align-items:center;gap:16px}
+.perfil-av-wrap{position:relative;cursor:pointer}
+.perfil-av{width:88px;height:88px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:26px;overflow:hidden;border:3px solid #EA580C}
+.perfil-av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.perfil-av-edit{position:absolute;bottom:0;right:0;width:26px;height:26px;border-radius:50%;background:#EA580C;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+.perfil-nome-edit{width:100%;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:12px 16px;font-size:16px;font-weight:600;color:#0F172A;outline:none;font-family:inherit;text-align:center}
+.perfil-nome-edit:focus{border-color:#EA580C}
+.perfil-info{background:#F8FAFC;border-radius:12px;padding:14px 18px;width:100%;font-size:13px;color:#475569}
+.perfil-btn{width:100%;padding:13px;border-radius:12px;border:none;background:#EA580C;font-size:15px;font-weight:700;color:#fff;cursor:pointer}
+.perfil-btn:active{background:#C2410C}
+.perfil-btn-sec{width:100%;padding:12px;border-radius:12px;border:1.5px solid #FEE2E2;background:#FFF5F5;color:#DC2626;font-size:14px;font-weight:700;cursor:pointer}
+#input-foto{display:none}
 ::-webkit-scrollbar{width:0}
 </style>
 </head>
@@ -367,6 +380,14 @@ function entrarNoApp(uid){
   db.ref('status/'+uid).set({token:_tk,nome:u.nome,online:true,lastSeen:firebase.database.ServerValue.TIMESTAMP});
   db.ref('status/'+uid).onDisconnect().set({token:_tk,nome:u.nome,online:false,lastSeen:firebase.database.ServerValue.TIMESTAMP});
   criarGruposPadrao();
+  // Carregar foto e nome atualizados do banco
+  db.ref('usuarios/'+uid).once('value').then(function(snap){
+    var dados=snap.val();
+    if(dados){
+      if(dados.foto)SESSAO.foto=dados.foto;
+      if(dados.nome)SESSAO.nome=dados.nome;
+    }
+  });
   renderLista();
   pedirNotificacao();
   if(SESSAO.tipo==='admin'){var bf=$('btn-formal');if(bf)bf.classList.remove('hi');}
@@ -425,7 +446,8 @@ function renderLista(){
         if(u.tipo==='comercial'){
           var cid='dir_'+[SESSAO.token,tk].sort().join('_');
           html+='<div class="cv" data-canal="'+cid+'" data-nome="'+u.nome+'" data-cor="'+u.cor+'" data-tipo="direto">';
-          html+='<div class="cv-a" style="background:'+u.cor+'">'+ini(u.nome)+'</div>';
+          // Verificar foto do usuário no banco (assíncrono — avatar padrão por ora)
+        html+='<div class="cv-a" style="background:'+u.cor+'" id="av_'+tk+'">'+ini(u.nome)+'</div>';
           html+='<div class="cv-b"><div class="cv-tp"><div class="cv-n">'+u.nome+'</div>';
           html+='<div class="cv-t" id="t_'+cid+'"></div></div>';
           html+='<div class="cv-p" id="p_'+cid+'">Conversa direta</div></div></div>';
@@ -439,7 +461,8 @@ function renderLista(){
         var u=USERS[tk];
         var cid='dir_'+[SESSAO.token,tk].sort().join('_');
         html+='<div class="cv" data-canal="'+cid+'" data-nome="'+u.nome+'" data-cor="'+u.cor+'" data-tipo="direto">';
-        html+='<div class="cv-a" style="background:'+u.cor+'">'+ini(u.nome)+'</div>';
+        // Verificar foto do usuário no banco (assíncrono — avatar padrão por ora)
+        html+='<div class="cv-a" style="background:'+u.cor+'" id="av_'+tk+'">'+ini(u.nome)+'</div>';
         html+='<div class="cv-b"><div class="cv-tp"><div class="cv-n">'+u.nome+'</div>';
         html+='<div style="display:flex;align-items:center;gap:6px"><div class="cv-badge" id="badge_'+cid+'" style="display:none">1</div><div class="cv-t" id="t_'+cid+'"></div></div></div>';
         html+='<div class="cv-p" id="p_'+cid+'">Conversa direta</div></div>';
@@ -537,14 +560,69 @@ function navTab(tab){
 function mostrarPerfil(){
   if(!SESSAO)return;
   var lista=$('lista-conv');
-  lista.innerHTML='<div style="padding:24px;display:flex;flex-direction:column;align-items:center;gap:16px">'
-    +'<div style="width:72px;height:72px;border-radius:50%;background:'+SESSAO.cor+';display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:22px">'+ini(SESSAO.nome)+'</div>'
-    +'<div style="text-align:center"><div style="font-size:18px;font-weight:800;color:#0F172A">'+SESSAO.nome+'</div><div style="font-size:13px;color:#94A3B8;margin-top:2px">'+SESSAO.cargo+'</div></div>'
-    +'<div style="background:#F8FAFC;border-radius:12px;padding:14px 18px;width:100%;font-size:13px;color:#475569">'
+  var avHtml=SESSAO.foto
+    ?'<img src="'+SESSAO.foto+'" alt="">'
+    :'<span>'+ini(SESSAO.nome)+'</span>';
+  lista.innerHTML='<div class="perfil-wrap">'
+    +'<input type="file" id="input-foto" accept="image/*" onchange="trocarFoto(this)">'
+    +'<div class="perfil-av-wrap" onclick="abrirSeletorFoto()">'
+    +'<div class="perfil-av" style="background:'+SESSAO.cor+'">'+avHtml+'</div>'
+    +'<div class="perfil-av-edit"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>'
+    +'</div>'
+    +'<div style="text-align:center;width:100%">'
+    +'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94A3B8;margin-bottom:6px">Seu nome</div>'
+    +'<input class="perfil-nome-edit" id="edit-nome" value="'+SESSAO.nome+'" placeholder="Seu nome" maxlength="30">'
+    +'</div>'
+    +'<div class="perfil-info">'
     +'<div style="margin-bottom:6px"><b style="color:#0F172A">Token:</b> '+SESSAO.token+'</div>'
-    +'<div><b style="color:#0F172A">Tipo:</b> '+SESSAO.tipo+'</div></div>'
-    +'<button onclick="logout()" style="width:100%;padding:12px;border-radius:12px;border:1.5px solid #FEE2E2;background:#FFF5F5;color:#DC2626;font-size:14px;font-weight:700;cursor:pointer">Sair da conta</button>'
+    +'<div><b style="color:#0F172A">Cargo:</b> '+SESSAO.cargo+'</div>'
+    +'</div>'
+    +'<button class="perfil-btn" onclick="salvarPerfil()">Salvar alterações</button>'
+    +'<button class="perfil-btn-sec" onclick="logout()">Sair da conta</button>'
     +'</div>';
+}
+
+function abrirSeletorFoto(){var el=document.getElementById("input-foto");if(el)el.click();}
+function trocarFoto(input){
+  var file=input.files[0];
+  if(!file)return;
+  if(file.size>5*1024*1024){toast('Foto muito grande. Máximo 5MB.');return;}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    // Redimensionar para 200x200
+    var img=new Image();
+    img.onload=function(){
+      var canvas=document.createElement('canvas');
+      canvas.width=200;canvas.height=200;
+      var ctx=canvas.getContext('2d');
+      // Crop centralizado
+      var size=Math.min(img.width,img.height);
+      var sx=(img.width-size)/2;
+      var sy=(img.height-size)/2;
+      ctx.drawImage(img,sx,sy,size,size,0,0,200,200);
+      var base64=canvas.toDataURL('image/jpeg',0.8);
+      // Preview imediato
+      var avEl=document.querySelector('.perfil-av');
+      if(avEl)avEl.innerHTML='<img src="'+base64+'" alt="">';
+      // Salvar no Firebase
+      SESSAO.foto=base64;
+      db.ref('usuarios/'+SESSAO.uid+'/foto').set(base64);
+      toast('Foto atualizada!');
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function salvarPerfil(){
+  var novoNome=$('edit-nome')?$('edit-nome').value.trim():'';
+  if(!novoNome){toast('Digite um nome');return;}
+  SESSAO.nome=novoNome;
+  db.ref('usuarios/'+SESSAO.uid+'/nome').set(novoNome);
+  // Atualizar status online
+  db.ref('status/'+SESSAO.uid+'/nome').set(novoNome);
+  toast('Perfil salvo!');
+  mostrarPerfil();
 }
 
 /* ── MODAL CRIAR GRUPO ── */
