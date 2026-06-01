@@ -58,15 +58,15 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .cv-bg{min-width:20px;height:20px;border-radius:10px;background:#EA580C;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px;flex-shrink:0}
 
 /* FAB — posicionado acima do bnav fixo */
-.fab{position:fixed;bottom:calc(max(env(safe-area-inset-bottom,20px),20px) + 68px);right:calc(50% - 215px + 16px);width:50px;height:50px;border-radius:50%;background:#EA580C;border:none;display:flex;align-items:center;justify-content:center;color:#fff;font-size:26px;box-shadow:0 4px 14px rgba(234,88,12,.4);cursor:pointer;z-index:10}
+.fab{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 72px);right:calc(50% - 215px + 16px);width:50px;height:50px;border-radius:50%;background:#EA580C;border:none;display:flex;align-items:center;justify-content:center;color:#fff;font-size:26px;box-shadow:0 4px 14px rgba(234,88,12,.4);cursor:pointer;z-index:10}
 .fab:active{transform:scale(.93)}
-@media(max-width:430px){.fab{right:16px}}
+@media(max-width:430px){.fab{right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 72px)}}
 
 /* BOTTOM NAV — sempre fixo */
-.bnav{display:flex;background:#fff;border-top:1px solid #E2E8F0;padding:10px 0 max(env(safe-area-inset-bottom,20px),20px);flex-shrink:0;padding-bottom:max(env(safe-area-inset-bottom,20px),20px)}
-.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;font-weight:600;color:#94A3B8;cursor:pointer;border:none;background:none}
+.bnav{display:flex;background:#fff;border-top:1px solid #E2E8F0;padding:8px 0 calc(env(safe-area-inset-bottom,0px) + 8px);flex-shrink:0}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600;color:#94A3B8;cursor:pointer;border:none;background:none}
 .nb.active{color:#EA580C}
-.nb svg{width:26px;height:26px}
+.nb svg{width:24px;height:24px}
 
 /* TELA CHAT — cobre tudo */
 #tela-chat{flex-direction:column;height:100%;position:absolute;inset:0;z-index:20;background:#fff;will-change:transform}
@@ -115,7 +115,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .btn-criar:active{background:#C2410C}
 
 /* TOAST */
-.toast{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 90px);left:50%;transform:translateX(-50%);background:#0F172A;color:#fff;padding:10px 18px;border-radius:12px;font-size:13px;font-weight:600;z-index:200;white-space:nowrap;animation:ti .25s ease;box-shadow:0 6px 20px rgba(0,0,0,.2)}
+.toast{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 76px);left:50%;transform:translateX(-50%);background:#0F172A;color:#fff;padding:10px 18px;border-radius:12px;font-size:13px;font-weight:600;z-index:200;white-space:nowrap;animation:ti .25s ease;box-shadow:0 6px 20px rgba(0,0,0,.2)}
 @keyframes ti{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 
 .in-formal{background:none;border:none;font-size:20px;color:#94A3B8;cursor:pointer;padding:6px;border-radius:8px}
@@ -986,28 +986,17 @@ document.addEventListener('touchstart',function(e){
 
 /* ── EXCLUIR / LIMPAR CONVERSA ── */
 function excluirConversa(canal,nome){
+  // Só usado para conversas diretas agora
+  // Grupos usam sairDoGrupo()
   var isGrupo=!canal.startsWith('dir_');
-  var msg=isGrupo
-    ?'Tem certeza que deseja excluir o grupo "'+nome+'"? As mensagens serao apagadas para todos os membros.'
-    :'Tem certeza que deseja apagar a conversa com '+nome+'? As mensagens serao excluidas permanentemente.';
-  if(!confirm(msg))return;
-  // Remover o card da lista imediatamente
+  if(isGrupo){sairDoGrupo(canal,nome);return;}
+  if(!confirm('Apagar a conversa com '+nome+'? As mensagens serao removidas.'))return;
   var card=document.querySelector('.cv[data-canal="'+canal+'"]');
   if(card)card.remove();
-  // Apagar mensagens no Firebase
   db.ref('mensagens/'+canal).remove();
-  // Se grupo, apagar o grupo também
-  if(isGrupo){
-    db.ref('grupos/'+canal).once('value').then(function(s){
-      var g=s.val();
-      if(g&&g.criadorToken===SESSAO.token){
-        db.ref('grupos/'+canal).remove();
-      }
-    });
-  }
-  // Se estava nessa conversa, volta para lista
+  localStorage.removeItem('visto_'+canal);
   if(CONV&&CONV.canal===canal)voltarLista();
-  toast(isGrupo?'Grupo excluído':'Conversa apagada');
+  toast('Conversa apagada');
 }
 
 
@@ -1063,16 +1052,13 @@ function abrirInfoConversa(){
         });
       });
       // Botão excluir grupo (só criador)
-      if(criador===SESSAO.token){
-        var btnEl=document.createElement('button');
-        btnEl.textContent='Excluir grupo';
-        btnEl.style.cssText='width:100%;padding:11px;border-radius:10px;border:none;background:#FEE2E2;color:#DC2626;font-size:13px;font-weight:700;cursor:pointer';
-        btnEl.onclick=function(){excluirConversa(CONV.canal,CONV.nome);fecharInfoConversa();};
-        actions.innerHTML='';
-        actions.appendChild(btnEl);
-      } else {
-        actions.innerHTML='';
-      }
+      // Todos podem sair — ninguém apaga para os outros
+      actions.innerHTML='';
+      var btnSair=document.createElement('button');
+      btnSair.textContent='Sair do grupo';
+      btnSair.style.cssText='width:100%;padding:11px;border-radius:10px;border:none;background:#FEF3C7;color:#B45309;font-size:13px;font-weight:700;cursor:pointer';
+      btnSair.onclick=function(){sairDoGrupo(CONV.canal,CONV.nome);fecharInfoConversa();};
+      actions.appendChild(btnSair);
     });
   } else {
     // Conversa direta
@@ -1113,6 +1099,38 @@ function clicarMembroGrupo(tk){
     voltarLista();
     setTimeout(function(){abrirChat(cid,u.nome,u.cor,'direto');},80);
   },150);
+}
+
+
+/* ── SAIR DO GRUPO ── */
+function sairDoGrupo(canal, nome){
+  if(!confirm('Sair do grupo "'+nome+'"? O grupo continua para os outros membros.'))return;
+  db.ref('grupos/'+canal).once('value').then(function(snap){
+    var g=snap.val();
+    if(!g)return;
+    var membros=[];
+    try{membros=JSON.parse(g.membros||'[]');}catch(e){}
+    var novosMembros=membros.filter(function(tk){return tk!==SESSAO.token;});
+    if(novosMembros.length===0){
+      // Último a sair — apaga o grupo
+      db.ref('grupos/'+canal).remove();
+      db.ref('mensagens/'+canal).remove();
+    } else {
+      var update={membros:JSON.stringify(novosMembros)};
+      // Se era o criador, passa para o próximo membro
+      if(g.criadorToken===SESSAO.token){
+        update.criadorToken=novosMembros[0];
+      }
+      db.ref('grupos/'+canal).update(update);
+    }
+    // Apagar mensagens só para si (localStorage)
+    localStorage.removeItem('visto_'+canal);
+    // Remover card da lista imediatamente
+    var card=document.querySelector('.cv[data-canal="'+canal+'"]');
+    if(card)card.remove();
+    if(CONV&&CONV.canal===canal)voltarLista();
+    toast('Você saiu do grupo');
+  });
 }
 
 /* ── AUTO LOGIN ── */
