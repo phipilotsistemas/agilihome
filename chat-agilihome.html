@@ -47,7 +47,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .search-wrap.show{display:block}
 .search-inp{width:100%;background:var(--gray-100);border:1.5px solid var(--gray-200);border-radius:22px;padding:9px 16px;font-size:14px;outline:none;font-family:inherit;color:var(--gray-900)}
 .search-inp:focus{border-color:var(--orange)}
-.filters{display:flex;gap:6px;padding:4px 12px 8px;flex-shrink:0;overflow-x:auto}
+.filters{display:flex;gap:6px;padding:10px 12px 8px;flex-shrink:0;overflow-x:auto}
 .filters::-webkit-scrollbar{width:0;height:0}
 .flt{padding:5px 14px;border-radius:16px;font-size:12px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;transition:all .15s}
 .flt-a{background:var(--orange);color:#fff}.flt-i{background:var(--gray-100);color:var(--gray-500)}
@@ -64,13 +64,13 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .cv-badge{min-width:20px;height:20px;border-radius:10px;background:var(--orange);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 5px;flex-shrink:0}
 .cv-del{position:absolute;right:0;top:0;bottom:0;width:80px;background:#EF4444;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;transform:translateX(80px);transition:transform .25s;flex-direction:column;gap:3px}
 .cv.swipe-open .cv-del{transform:translateX(0)}
-.fab{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px)+74px);right:calc(50% - 215px + 16px);width:52px;height:52px;border-radius:50%;background:var(--orange);border:none;display:flex;align-items:center;justify-content:center;color:#fff;font-size:26px;box-shadow:0 4px 16px rgba(234,88,12,.4);cursor:pointer;z-index:10}
+.fab{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 80px);right:16px;width:52px;height:52px;border-radius:50%;background:var(--orange);border:none;display:flex;align-items:center;justify-content:center;color:#fff;font-size:26px;box-shadow:0 4px 16px rgba(234,88,12,.4);cursor:pointer;z-index:10}
 .fab:active{transform:scale(.92)}
-@media(max-width:430px){.fab{right:16px}}
-.bnav{display:flex;background:#fff;border-top:1px solid var(--gray-200);padding:8px 0 calc(env(safe-area-inset-bottom,0px)+8px);flex-shrink:0}
+
+.bnav{display:flex;background:#fff;border-top:1px solid var(--gray-200);padding:10px 0 calc(env(safe-area-inset-bottom,0px) + 12px);flex-shrink:0}
 .nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600;color:var(--gray-400);cursor:pointer;border:none;background:none;padding:0}
 .nb.active{color:var(--orange)}.nb svg{width:24px;height:24px}
-.phi-foot{text-align:center;font-size:10px;color:var(--gray-200);padding:2px 0;flex-shrink:0}
+.phi-foot{display:none}
 
 /* ── TELA CHAT ── */
 #tela-chat{flex-direction:column;height:100%;position:absolute;inset:0;z-index:20;background:#fff;will-change:transform}
@@ -424,7 +424,7 @@ var VAPID='BNHCHKb8AKd3bL5T8X_4D0g9bj4Z4iZRoDtQt4RjE8psDThDg1AYRlUMhEeHbTg8ZQEt_
 /* ── USUÁRIOS ── */
 var USERS={
   'ADM-MARCO':{nome:'Marco Antonio de Borba',cargo:'Sócio · Rede Mestre da Obra',tipo:'admin',cor:'#EA580C'},
-  'ADM-JOAO':{nome:'João Gabriel',cargo:'Advogado · Consultor Jurídico',tipo:'admin',cor:'#1E40AF'},
+  'ADM-JOAO':{nome:'João Gabriel Campos',cargo:'Advogado',tipo:'admin',cor:'#1E40AF'},
   'ADM-PHILLIPE':{nome:'Phillipe de Paula',cargo:'Administrador PhiPilot',tipo:'admin',cor:'#7C3AED'}
 };
 
