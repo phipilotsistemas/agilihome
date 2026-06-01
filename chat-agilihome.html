@@ -69,7 +69,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .nb svg{width:26px;height:26px}
 
 /* TELA CHAT — cobre tudo */
-#tela-chat{flex-direction:column;height:100%;position:absolute;inset:0;z-index:20;background:#fff}
+#tela-chat{flex-direction:column;height:100%;position:absolute;inset:0;z-index:20;background:#fff;will-change:transform}
 .ch-hdr{background:#C2410C;padding:calc(env(safe-area-inset-top,0px) + 8px) 12px 8px;display:flex;align-items:center;gap:10px;flex-shrink:0}
 .ch-back{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:4px}
 .ch-av{width:36px;height:36px;border-radius:50%;background:#fff;padding:2px;overflow:hidden;flex-shrink:0}
@@ -142,6 +142,10 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .perfil-btn:active{background:#C2410C}
 .perfil-btn-sec{width:100%;padding:12px;border-radius:12px;border:1.5px solid #FEE2E2;background:#FFF5F5;color:#DC2626;font-size:14px;font-weight:700;cursor:pointer}
 #input-foto{display:none}
+.modal-info-membro{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;cursor:pointer;transition:background .1s}
+.modal-info-membro:hover{background:#F8FAFC}
+.modal-info-membro-av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff;flex-shrink:0;overflow:hidden}
+.modal-info-membro-av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 ::-webkit-scrollbar{width:0}
 </style>
 </head>
@@ -181,6 +185,10 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
     <button class="lg-back" onclick="voltarToken()">Outro token</button>
   </div>
   <div class="lg-loading hi" id="step-loading">Conectando...</div>
+  <div style="margin-top:24px;font-size:11px;color:#CBD5E1;text-align:center;line-height:1.8">
+    Desenvolvido por <span style="color:#94A3B8;font-weight:600">PhiPilot Sistemas</span><br>
+    Todos os direitos reservados
+  </div>
 </div>
 
 <!-- TELA PRINCIPAL -->
@@ -204,6 +212,8 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
   <div id="lista-conv"></div>
   <!-- FAB -->
   <button class="fab" onclick="abrirModalFab()">+</button>
+  <!-- RODAPÉ -->
+  <div style="text-align:center;font-size:10px;color:#CBD5E1;padding:2px 0;flex-shrink:0">PhiPilot Sistemas</div>
   <!-- BOTTOM NAV FIXO -->
   <div class="bnav">
     <button class="nb active" id="nb-conv" onclick="navTab('conv')">
@@ -222,10 +232,12 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 <div id="tela-chat" class="hi">
   <div class="ch-hdr">
     <button class="ch-back" onclick="voltarLista()">&#8592;</button>
-    <div class="ch-av" id="ch-avatar"></div>
-    <div class="ch-info"><div class="ch-nm" id="ch-nome"></div><div class="ch-sb" id="ch-sub"></div></div>
-    <!-- telefone REMOVIDO -->
-    <button class="ch-hdr-i">&#8942;</button>
+    <div class="ch-av" id="ch-avatar" onclick="abrirInfoConversa()" style="cursor:pointer"></div>
+    <div class="ch-info" onclick="abrirInfoConversa()" style="cursor:pointer">
+      <div class="ch-nm" id="ch-nome"></div>
+      <div class="ch-sb" id="ch-sub"></div>
+    </div>
+    <button class="ch-hdr-i" onclick="abrirInfoConversa()">&#8942;</button>
   </div>
   <div id="msgs-area"></div>
   <div class="input-area">
@@ -245,6 +257,27 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
     <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94A3B8;margin-top:4px">Conversa direta</div>
     <div id="fab-diretos-list"></div>
     <button class="btn-cancel" onclick="fecharModalFab()">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL INFO CONVERSA -->
+<div class="modal-bg hi" id="modal-info-conv">
+  <div class="modal" style="gap:0;padding:0;overflow:hidden">
+    <div id="modal-info-hdr" style="padding:20px 20px 16px;border-bottom:1px solid #F1F5F9">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="font-size:16px;font-weight:800;color:#0F172A" id="modal-info-titulo"></div>
+        <button onclick="fecharInfoConversa()" style="background:none;border:none;font-size:18px;color:#94A3B8;cursor:pointer;padding:2px">✕</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div id="modal-info-av" style="width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:16px;flex-shrink:0"></div>
+        <div>
+          <div style="font-size:15px;font-weight:700;color:#0F172A" id="modal-info-nome"></div>
+          <div style="font-size:12px;color:#94A3B8" id="modal-info-sub"></div>
+        </div>
+      </div>
+    </div>
+    <div id="modal-info-body" style="padding:16px;max-height:320px;overflow-y:auto"></div>
+    <div style="padding:12px 16px;border-top:1px solid #F1F5F9" id="modal-info-actions"></div>
   </div>
 </div>
 
@@ -419,14 +452,7 @@ function logout(){
 
 /* ── GRUPOS PADRÃO ── */
 function criarGruposPadrao(){
-  db.ref('grupos').once('value').then(function(s){
-    if(s.exists())return;
-    db.ref('grupos').set({
-      g_rede:{nome:'Rede agilihome',tipo:'grupo',cor:'#EA580C',membros:'todos',criadorToken:'sistema'},
-      g_consul:{nome:'Consultores',tipo:'grupo',cor:'#1E40AF',membros:'todos',criadorToken:'sistema'},
-      g_ops:{nome:'Operacional',tipo:'grupo',cor:'#16A34A',membros:'todos',criadorToken:'sistema'}
-    });
-  });
+  // Grupos fixos removidos — apenas grupos criados pelos usuários
 }
 
 /* ── LISTA DE CONVERSAS ── */
@@ -441,9 +467,8 @@ function renderLista(){
       if(_filtro==='grupos'&&g.tipo!=='grupo')return;
       if(_filtro==='equipe'&&g.tipo!=='direto')return;
       // naoLidas — renderizar todos primeiro, depois ocultar via JS
-      var isLogo=(id==='g_rede');
-      var avInner=isLogo?'<img src="icon-192.png" alt="" style="width:100%;height:100%;object-fit:cover">':ini(g.nome);
-      var avSt=isLogo?'background:#fff;border:2px solid #EA580C':'background:'+g.cor;
+      var avInner=ini(g.nome);
+      var avSt='background:'+g.cor;
       var podeExcluir=(g.criadorToken===SESSAO.token&&id!=='g_rede'&&id!=='g_consul'&&id!=='g_ops');
       html+='<div class="cv" data-canal="'+id+'" data-nome="'+g.nome+'" data-cor="'+g.cor+'" data-tipo="'+g.tipo+'">';
       html+='<div class="cv-a" style="'+avSt+'">'+avInner+'</div>';
@@ -533,20 +558,15 @@ function escutarNovasMensagens(){
 
 /* ── FILTROS ── */
 document.addEventListener('click',function(e){
+  // Membro do grupo
+  var mem=e.target.closest('[data-membro]');
+  if(mem&&mem.dataset.membro){clicarMembroGrupo(mem.dataset.membro);return;}
   // Botão excluir
   var del=e.target.closest('.cv-del');
-  if(del&&del.dataset.del){
-    e.stopPropagation();
-    excluirConversa(del.dataset.del,del.dataset.nome);
-    return;
-  }
+  if(del&&del.dataset.del){e.stopPropagation();excluirConversa(del.dataset.del,del.dataset.nome);return;}
   // FAB direto
   var dir=e.target.closest('[data-direto]');
-  if(dir&&dir.dataset.direto){
-    fecharModalFab();
-    iniciarDireto(dir.dataset.direto);
-    return;
-  }
+  if(dir&&dir.dataset.direto){fecharModalFab();iniciarDireto(dir.dataset.direto);return;}
   // Abrir chat
   var cv=e.target.closest('.cv');
   if(cv&&cv.dataset.canal)abrirChat(cv.dataset.canal,cv.dataset.nome,cv.dataset.cor,cv.dataset.tipo);
@@ -736,13 +756,8 @@ function abrirChat(canal,nome,cor,tipo){
   if(badgeEl)badgeEl.style.display='none';
   limparBadge();
   var av=$('ch-avatar');
-  if(canal==='g_rede'){
-    av.innerHTML='<img src="icon-192.png" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover">';
-    av.style.background='#fff';
-  }else{
-    av.style.background=cor;
-    av.innerHTML='<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;border-radius:50%">'+ini(nome)+'</div>';
-  }
+  av.style.background=cor;
+  av.innerHTML='<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;border-radius:50%">'+ini(nome)+'</div>';
   $('ch-nome').textContent=nome;
   $('ch-sub').textContent=(tipo==='grupo')?'Grupo':'Conversa direta';
   var tc=$('tela-chat');tc.classList.remove('hi');tc.style.display='flex';tc.style.flexDirection='column';
@@ -888,31 +903,82 @@ function urlBase64ToUint8Array(base64String){
 
 
 
-/* ── SWIPE TO DELETE ── */
-var _swipeStart={x:0,y:0,el:null};
+/* ── SWIPE TO DELETE (lista) + SWIPE PARA VOLTAR (chat) ── */
+var _swipeStart={x:0,y:0,el:null,ctx:null};
+
 document.addEventListener('touchstart',function(e){
-  var cv=e.target.closest('.cv');
-  if(!cv||!cv.querySelector('.cv-del'))return;
-  _swipeStart={x:e.touches[0].clientX,y:e.touches[0].clientY,el:cv};
-},{passive:true});
-document.addEventListener('touchend',function(e){
-  if(!_swipeStart.el)return;
-  var dx=e.changedTouches[0].clientX-_swipeStart.x;
-  var dy=Math.abs(e.changedTouches[0].clientY-_swipeStart.y);
-  var el=_swipeStart.el;
-  _swipeStart={x:0,y:0,el:null};
-  if(dy>30)return; // scroll vertical, ignora
-  if(dx<-50){
-    // Swipe esquerda — abrir
-    document.querySelectorAll('.cv.swipe-open').forEach(function(c){if(c!==el)c.classList.remove('swipe-open');});
-    el.classList.add('swipe-open');
-  } else if(dx>20){
-    // Swipe direita — fechar
-    el.classList.remove('swipe-open');
+  var x=e.touches[0].clientX;
+  var y=e.touches[0].clientY;
+  // Contexto: dentro do chat ou na lista?
+  var noChat=!$('tela-chat').classList.contains('hi');
+  if(noChat){
+    // Só iniciar swipe de volta se começar na borda esquerda (0-30px)
+    _swipeStart={x:x,y:y,el:null,ctx:'chat'};
+  } else {
+    var cv=e.target.closest('.cv');
+    if(cv&&cv.querySelector('.cv-del')){
+      _swipeStart={x:x,y:y,el:cv,ctx:'lista'};
+    }
   }
 },{passive:true});
-// Fechar swipe ao clicar fora
+
+document.addEventListener('touchmove',function(e){
+  if(_swipeStart.ctx!=='chat'||!CONV)return;
+  var dx=e.touches[0].clientX-_swipeStart.x;
+  var dy=Math.abs(e.touches[0].clientY-_swipeStart.y);
+  if(dy>dx||dx<0)return; // ignora scroll vertical ou swipe esquerda
+  // Arrastar o painel de chat visualmente
+  if(dx>10){
+    var tc=$('tela-chat');
+    tc.style.transform='translateX('+Math.min(dx,window.innerWidth)+'px)';
+    tc.style.transition='none';
+  }
+},{passive:true});
+
+document.addEventListener('touchend',function(e){
+  var dx=e.changedTouches[0].clientX-_swipeStart.x;
+  var dy=Math.abs(e.changedTouches[0].clientY-_swipeStart.y);
+
+  if(_swipeStart.ctx==='chat'){
+    var tc=$('tela-chat');
+    if(dx>80&&dy<60){
+      // Swipe suficiente — voltar
+      tc.style.transform='translateX('+window.innerWidth+'px)';
+      tc.style.transition='transform .25s ease';
+      setTimeout(function(){
+        tc.style.transform='';
+        tc.style.transition='';
+        voltarLista();
+      },240);
+    } else {
+      // Cancelar — voltar para posição original
+      tc.style.transform='';
+      tc.style.transition='transform .2s ease';
+      setTimeout(function(){tc.style.transition='';},200);
+    }
+    _swipeStart={x:0,y:0,el:null,ctx:null};
+    return;
+  }
+
+  if(_swipeStart.ctx==='lista'&&_swipeStart.el){
+    var el=_swipeStart.el;
+    _swipeStart={x:0,y:0,el:null,ctx:null};
+    if(dy>30)return;
+    if(dx<-50){
+      document.querySelectorAll('.cv.swipe-open').forEach(function(c){if(c!==el)c.classList.remove('swipe-open');});
+      el.classList.add('swipe-open');
+    } else if(dx>20){
+      el.classList.remove('swipe-open');
+    }
+    return;
+  }
+
+  _swipeStart={x:0,y:0,el:null,ctx:null};
+},{passive:true});
+
+// Fechar swipe-open ao tocar fora
 document.addEventListener('touchstart',function(e){
+  if(_swipeStart.ctx==='lista')return;
   if(!e.target.closest('.cv')){
     document.querySelectorAll('.cv.swipe-open').forEach(function(c){c.classList.remove('swipe-open');});
   }
@@ -922,12 +988,15 @@ document.addEventListener('touchstart',function(e){
 function excluirConversa(canal,nome){
   var isGrupo=!canal.startsWith('dir_');
   var msg=isGrupo
-    ?'Excluir o grupo "'+nome+'"? As mensagens serão apagadas para todos.'
-    :'Limpar o histórico da conversa com '+nome+'? As mensagens serão apagadas.';
+    ?'Tem certeza que deseja excluir o grupo "'+nome+'"? As mensagens serao apagadas para todos os membros.'
+    :'Tem certeza que deseja apagar a conversa com '+nome+'? As mensagens serao excluidas permanentemente.';
   if(!confirm(msg))return;
-  // Apagar mensagens
+  // Remover o card da lista imediatamente
+  var card=document.querySelector('.cv[data-canal="'+canal+'"]');
+  if(card)card.remove();
+  // Apagar mensagens no Firebase
   db.ref('mensagens/'+canal).remove();
-  // Se for grupo criado pelo usuário, apagar o grupo também
+  // Se grupo, apagar o grupo também
   if(isGrupo){
     db.ref('grupos/'+canal).once('value').then(function(s){
       var g=s.val();
@@ -936,7 +1005,114 @@ function excluirConversa(canal,nome){
       }
     });
   }
-  toast(isGrupo?'Grupo excluído':'Conversa limpa');
+  // Se estava nessa conversa, volta para lista
+  if(CONV&&CONV.canal===canal)voltarLista();
+  toast(isGrupo?'Grupo excluído':'Conversa apagada');
+}
+
+
+/* ── INFO DA CONVERSA ── */
+function abrirInfoConversa(){
+  if(!CONV)return;
+  var modal=$('modal-info-conv');
+  var hdrAv=$('modal-info-av');
+  var hdrNome=$('modal-info-nome');
+  var hdrSub=$('modal-info-sub');
+  var hdrTitulo=$('modal-info-titulo');
+  var body=$('modal-info-body');
+  var actions=$('modal-info-actions');
+
+  hdrAv.style.background=CONV.cor;
+  hdrAv.textContent=ini(CONV.nome);
+  hdrNome.textContent=CONV.nome;
+
+  if(CONV.tipo==='grupo'){
+    hdrTitulo.textContent='Informações do grupo';
+    hdrSub.textContent='Grupo';
+    // Buscar membros do grupo no Firebase
+    db.ref('grupos/'+CONV.canal).once('value').then(function(snap){
+      var g=snap.val();
+      if(!g){body.innerHTML='<div style="color:#94A3B8;font-size:13px">Grupo não encontrado</div>';return;}
+      var membrosStr=g.membros||'[]';
+      var membros=[];
+      try{membros=JSON.parse(membrosStr);}catch(e){membros=[];}
+      // Criador
+      var criador=g.criadorToken||'';
+      var html='<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94A3B8;margin-bottom:10px">'+membros.length+' membros</div>';
+      membros.forEach(function(tk){
+        var u=USERS[tk];
+        if(!u)return;
+        var isSelf=(tk===SESSAO.token);
+        var isCriador=(tk===criador);
+        html+='<div class="modal-info-membro" '+(isSelf?'':'data-membro="'+tk+'"')+'">';
+        html+='<div class="modal-info-membro-av" id="mav-'+tk+'" style="background:'+u.cor+'">'+ini(u.nome)+'</div>';
+        html+='<div style="flex:1"><div style="font-size:13px;font-weight:700;color:#0F172A">'+u.nome+(isSelf?' <span style="font-size:10px;background:#F1F5F9;color:#94A3B8;padding:1px 6px;border-radius:4px;font-weight:400">Você</span>':'')+'</div>';
+        html+='<div style="font-size:11px;color:#94A3B8">'+u.cargo+(isCriador?' · Criador do grupo':'')+'</div></div>';
+        if(!isSelf)html+='<div style="font-size:18px;color:#CBD5E1">›</div>';
+        html+='</div>';
+      });
+      body.innerHTML=html;
+      // Carregar fotos dos membros
+      membros.forEach(function(tk){
+        db.ref('usuarios').orderByChild('token').equalTo(tk).limitToFirst(1).once('value').then(function(s){
+          if(!s.exists())return;
+          var d=Object.values(s.val())[0];
+          if(!d||!d.foto)return;
+          var el=document.getElementById('mav-'+tk);
+          if(el)el.innerHTML='<img src="'+d.foto+'">';
+        });
+      });
+      // Botão excluir grupo (só criador)
+      if(criador===SESSAO.token){
+        var btnEl=document.createElement('button');
+        btnEl.textContent='Excluir grupo';
+        btnEl.style.cssText='width:100%;padding:11px;border-radius:10px;border:none;background:#FEE2E2;color:#DC2626;font-size:13px;font-weight:700;cursor:pointer';
+        btnEl.onclick=function(){excluirConversa(CONV.canal,CONV.nome);fecharInfoConversa();};
+        actions.innerHTML='';
+        actions.appendChild(btnEl);
+      } else {
+        actions.innerHTML='';
+      }
+    });
+  } else {
+    // Conversa direta
+    hdrTitulo.textContent='Informações do contato';
+    var tk=CONV.canal.replace('dir_','').replace(SESSAO.token+'_','').replace('_'+SESSAO.token,'');
+    var u=USERS[tk]||{nome:CONV.nome,cargo:'',cor:CONV.cor};
+    hdrSub.textContent=u.cargo||'Contato';
+    body.innerHTML='<div style="display:flex;flex-direction:column;gap:8px">'
+      +'<div style="background:#F8FAFC;border-radius:10px;padding:12px;font-size:13px;color:#374151">'
+      +'<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94A3B8;margin-bottom:4px">Token</div>'
+      +'<div style="font-weight:600;color:#0F172A">'+tk+'</div></div>'
+      +'<div style="background:#F8FAFC;border-radius:10px;padding:12px;font-size:13px;color:#374151">'
+      +'<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94A3B8;margin-bottom:4px">Cargo</div>'
+      +'<div style="font-weight:600;color:#0F172A">'+(u.cargo||'—')+'</div></div>'
+      +'</div>';
+    actions.innerHTML='';
+    // Carregar foto
+    db.ref('usuarios').orderByChild('token').equalTo(tk).limitToFirst(1).once('value').then(function(s){
+      if(!s.exists())return;
+      var d=Object.values(s.val())[0];
+      if(d&&d.foto){hdrAv.innerHTML='<img src="'+d.foto+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';}
+      if(d&&d.nome){hdrNome.textContent=d.nome;}
+    });
+  }
+  modal.classList.remove('hi');
+}
+
+function fecharInfoConversa(){
+  $('modal-info-conv').classList.add('hi');
+}
+
+function clicarMembroGrupo(tk){
+  var u=USERS[tk];
+  if(!u)return;
+  fecharInfoConversa();
+  var cid='dir_'+[SESSAO.token,tk].sort().join('_');
+  setTimeout(function(){
+    voltarLista();
+    setTimeout(function(){abrirChat(cid,u.nome,u.cor,'direto');},80);
+  },150);
 }
 
 /* ── AUTO LOGIN ── */
