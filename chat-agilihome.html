@@ -88,15 +88,15 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 /* Mensagem fixada */
 .msg-fixada{background:rgba(255,255,255,.12);padding:8px 12px;font-size:11px;color:rgba(255,255,255,.8);flex-shrink:0;border-top:1px solid rgba(255,255,255,.1);cursor:pointer;display:none}
 .msg-fixada.show{display:block}
-#msgs-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 12px;background:#F0F4F8;display:flex;flex-direction:column;gap:2px}
+#msgs-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 12px;background:#F0F4F8;display:flex;flex-direction:column;gap:6px}
 .date-sep{align-self:center;background:rgba(148,163,184,.25);border-radius:8px;padding:3px 10px;font-size:10px;color:var(--gray-500);margin:6px 0}
 /* MENSAGENS */
 .msg-wrap{display:flex;flex-direction:column;max-width:80%}
 .msg-wrap.mine{align-self:flex-end;align-items:flex-end}
 .msg-wrap.theirs{align-self:flex-start;align-items:flex-start}
 .msg-au{font-size:10px;font-weight:700;color:var(--orange);margin-bottom:2px;padding:0 4px}
-.msg{border-radius:14px;padding:8px 12px;font-size:13.5px;line-height:1.5;position:relative;word-break:break-word;transition:transform .15s ease}
-.msg-wrap{transition:transform .15s ease}
+.msg{border-radius:14px;padding:8px 12px;font-size:13.5px;line-height:1.5;position:relative;word-break:break-word;transition:transform .15s ease;min-width:60px}
+.msg-wrap{transition:transform .15s ease;margin-bottom:2px}
 .reply-icon{position:absolute;display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:var(--orange);color:#fff;opacity:0;transition:opacity .15s;pointer-events:none;font-size:14px}
 .msg.mine{background:var(--orange);color:#fff;border-bottom-right-radius:4px}
 .msg.theirs{background:#fff;border:1px solid var(--gray-200);color:var(--gray-900);border-bottom-left-radius:4px}
@@ -1328,7 +1328,7 @@ document.addEventListener('touchstart',function(e){
   var msg=e.target.closest('.msg');
   if(!msg||!CONV)return;
   // Ignorar se começou na borda esquerda (reservado para swipe-voltar)
-  if(e.touches[0].clientX<=30)return;
+  if(e.touches[0].clientX<=15)return;
   var wrap=msg.closest('.msg-wrap');
   _msgSwipe={active:true,el:msg,wrap:wrap,mid:msg.dataset.mid,startX:e.touches[0].clientX,startY:e.touches[0].clientY,triggered:false};
 },{passive:true});
