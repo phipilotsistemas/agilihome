@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.json">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;background:#fff}
+html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;background:#fff}html{background:var(--orange)}
 #app{height:100%;max-width:430px;margin:0 auto;display:flex;flex-direction:column;position:relative;overflow:hidden}
 .hi{display:none!important}
 ::-webkit-scrollbar{width:0}
@@ -39,7 +39,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 
 /* ── TELA PRINCIPAL ── */
 #tela-main{display:flex;flex-direction:column;height:100%;overflow:hidden}
-.hdr{background:var(--orange);padding:calc(env(safe-area-inset-top,0px)+10px) 16px 10px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.hdr{background:var(--orange);padding:10px 16px 10px;padding-top:calc(env(safe-area-inset-top,44px) + 10px);display:flex;align-items:center;gap:10px;flex-shrink:0}
 .hdr-logo{width:28px;height:28px;border-radius:7px;border:1px solid rgba(255,255,255,.2);object-fit:cover}
 .hdr-title{font-size:16px;font-weight:800;flex:1}.hdr-title .ag{color:rgba(255,255,255,.7)}.hdr-title .hm{color:#fff}
 .hdr-btn{background:none;border:none;color:rgba(255,255,255,.8);font-size:20px;cursor:pointer;padding:4px;line-height:1}
@@ -74,7 +74,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 
 /* ── TELA CHAT ── */
 #tela-chat{flex-direction:column;height:100%;position:absolute;inset:0;z-index:20;background:#fff;will-change:transform}
-.ch-hdr{background:var(--orange-dim);padding:calc(env(safe-area-inset-top,0px)+8px) 12px 8px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.ch-hdr{background:var(--orange-dim);padding:8px 12px 8px;padding-top:calc(env(safe-area-inset-top,44px) + 8px);display:flex;align-items:center;gap:10px;flex-shrink:0}
 .ch-back{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:4px;line-height:1}
 .ch-av{width:36px;height:36px;border-radius:50%;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff;cursor:pointer}
 .ch-av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
@@ -98,9 +98,9 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .msg{border-radius:14px;padding:8px 12px;font-size:13.5px;line-height:1.5;position:relative;word-break:break-word}
 .msg.mine{background:var(--orange);color:#fff;border-bottom-right-radius:4px}
 .msg.theirs{background:#fff;border:1px solid var(--gray-200);color:var(--gray-900);border-bottom-left-radius:4px}
-.msg.formal{background:#FFF7ED;border:2px solid var(--orange);color:var(--gray-900);border-bottom-left-radius:4px}
-.msg.formal.mine{align-self:flex-end;border-bottom-right-radius:4px;border-bottom-left-radius:14px}
-.msg-formal-badge{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;background:var(--orange);color:#fff;padding:2px 8px;border-radius:4px;display:inline-block;margin-bottom:5px}
+.msg.formal{background:#FFF7ED;border:2px solid var(--orange);color:var(--gray-900);border-bottom-left-radius:4px;display:flex;flex-direction:column;align-items:flex-start}
+.msg.formal.mine{align-self:flex-end;border-bottom-right-radius:4px;border-bottom-left-radius:14px;display:flex;flex-direction:column;align-items:flex-start}
+.msg-formal-badge{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;background:var(--orange);color:#fff;padding:2px 8px;border-radius:4px;display:block;margin-bottom:6px;width:fit-content}
 /* Reply */
 .msg-reply{background:rgba(0,0,0,.08);border-left:3px solid rgba(255,255,255,.5);border-radius:6px;padding:4px 8px;margin-bottom:5px;font-size:11px;cursor:pointer}
 .msg.theirs .msg-reply{background:var(--gray-100);border-left-color:var(--orange)}
@@ -540,19 +540,33 @@ function escutarNovas(){
 }
 
 /* ── LISTA DE CONVERSAS ── */
+/* ── CANAIS OCULTOS (saiu/apagou) — armazenados localmente por usuário ── */
+function _getOcultos(){try{return JSON.parse(localStorage.getItem('ah_ocultos_'+(SESSAO?SESSAO.token:''))||'[]');}catch(e){return[];}}
+function _addOculto(canal){var o=_getOcultos();if(!o.includes(canal)){o.push(canal);localStorage.setItem('ah_ocultos_'+(SESSAO?SESSAO.token:''),JSON.stringify(o));}}
+function _remOculto(canal){var o=_getOcultos().filter(function(x){return x!==canal;});localStorage.setItem('ah_ocultos_'+(SESSAO?SESSAO.token:''),JSON.stringify(o));}
+
+var _listaRef=null,_listaHandler=null;
+
 function renderLista(){
   var lista=$('lista-conv');if(!lista)return;
   lista.innerHTML='<div style="text-align:center;padding:24px;color:var(--gray-400);font-size:13px">Carregando...</div>';
-  // Usar once() + escuta separada para evitar o bug de restaurar conversas excluídas
-  db.ref('grupos').orderByChild('ativo').on('value',function(snap){
+  // Cancelar listener anterior
+  if(_listaRef&&_listaHandler){_listaRef.off('value',_listaHandler);_listaRef=null;}
+  var ocultos=_getOcultos();
+  _listaRef=db.ref('grupos');
+  _listaHandler=_listaRef.on('value',function(snap){
     var grupos=snap.val()||{};
     var html='';
+    var ocultos=_getOcultos(); // re-ler a cada update
     Object.keys(grupos).forEach(function(id){
       var g=grupos[id];
-      if(!g||g.ativo===false)return; // ignorar grupos inativos
+      if(!g)return;
+      // FILTRO LOCAL — usuário saiu/apagou este canal
+      if(ocultos.includes(id))return;
       if(_filtro==='grupos'&&g.tipo!=='grupo')return;
+      // Verificar se ainda é membro
       var mbs=[];try{mbs=JSON.parse(g.membros||'[]');}catch(e){}
-      if(g.tipo==='grupo'&&mbs.length&&!mbs.includes(SESSAO.token))return; // não é membro
+      if(g.tipo==='grupo'&&mbs.length>0&&!mbs.includes(SESSAO.token))return;
       var avHtml=ini(g.nome),avSt='background:'+g.cor;
       html+=_cvHtml(id,g.nome,g.cor,g.tipo,avHtml,avSt);
     });
@@ -560,15 +574,14 @@ function renderLista(){
     if(_filtro==='todos'||_filtro==='naoLidas'||_filtro==='equipe'){
       Object.keys(USERS).forEach(function(tk){
         if(tk===SESSAO.token)return;
-        var u=USERS[tk];
         var cid='dir_'+[SESSAO.token,tk].sort().join('_');
+        if(ocultos.includes(cid))return; // direto oculto
+        var u=USERS[tk];
         html+=_cvHtml(cid,u.nome,u.cor,'direto',ini(u.nome),'background:'+u.cor);
       });
     }
     lista.innerHTML=html||'<div style="text-align:center;padding:40px;color:var(--gray-400);font-size:13px">Nenhuma conversa</div>';
-    // Preview e badges
     _carregarPreviews(grupos);
-    // Status online
     _escutarStatus();
   });
 }
@@ -799,7 +812,7 @@ function excluirConversa(canal,nome){
   var isGrupo=!canal.startsWith('dir_');
   if(isGrupo){sairDoGrupo(canal,nome);return;}
   if(!confirm('Apagar conversa com '+nome+'? As mensagens serão removidas.'))return;
-  // Remover do Firebase também
+  _addOculto(canal); // ocultar localmente — não volta mais
   db.ref('mensagens/'+canal).remove();
   localStorage.removeItem('visto_'+canal);
   var card=document.querySelector('.cv[data-canal="'+canal+'"]');
@@ -809,22 +822,18 @@ function excluirConversa(canal,nome){
 }
 function sairDoGrupo(canal,nome){
   if(!confirm('Sair do grupo "'+nome+'"?'))return;
+  _addOculto(canal); // ocultar localmente antes de qualquer coisa
+  var card=document.querySelector('.cv[data-canal="'+canal+'"]');
+  if(card)card.remove();
+  if(CONV&&CONV.canal===canal)voltarLista();
   db.ref('grupos/'+canal).once('value').then(function(snap){
-    var g=snap.val();if(!g)return;
+    var g=snap.val();if(!g){toast('Você saiu do grupo.');return;}
     var mbs=[];try{mbs=JSON.parse(g.membros||'[]');}catch(e){}
     var novos=mbs.filter(function(tk){return tk!==SESSAO.token;});
-    if(novos.length===0){
-      // Marcar como inativo — NÃO apaga mensagens para os outros
-      db.ref('grupos/'+canal).update({ativo:false,membros:'[]'});
-    } else {
-      var upd={membros:JSON.stringify(novos)};
-      if(g.criadorToken===SESSAO.token)upd.criadorToken=novos[0];
-      db.ref('grupos/'+canal).update(upd);
-    }
+    var upd=novos.length===0?{membros:'[]'}:{membros:JSON.stringify(novos)};
+    if(g.criadorToken===SESSAO.token&&novos.length>0)upd.criadorToken=novos[0];
+    db.ref('grupos/'+canal).update(upd);
     localStorage.removeItem('visto_'+canal);
-    var card=document.querySelector('.cv[data-canal="'+canal+'"]');
-    if(card)card.remove();
-    if(CONV&&CONV.canal===canal)voltarLista();
     toast('Você saiu do grupo.');
   });
 }
@@ -889,7 +898,7 @@ function _renderMsg(mid,m){
   }
   html+='<div class="'+msgCls+'" data-mid="'+mid+'">';
   // Formal badge
-  if(m.formal)html+='<div class="msg-formal-badge">📋 Comunicado Oficial</div>';
+  if(m.formal){html+='<div class="msg-formal-badge">Comunicado Oficial</div>';}
   // Reply
   if(m.replyTexto){
     html+='<div class="msg-reply"><div class="msg-reply-au">'+(m.replyAu||'')+'</div><div class="msg-reply-txt">'+(m.replyTexto||'')+'</div></div>';
@@ -901,7 +910,7 @@ function _renderMsg(mid,m){
   } else if(m.enquete){
     html+=_renderEnquete(mid,m.enquete);
   } else {
-    html+=m.texto||'';
+    html+='<div style="word-break:break-word;line-height:1.5">'+( m.texto||'')+'</div>';
   }
   // Tempo + status
   var checks=mine?('<span class="'+(m.lido?'check-read':'check-sent')+'">'+( m.lido?'✓✓':'✓')+'</span>'):'';
