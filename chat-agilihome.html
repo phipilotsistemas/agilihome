@@ -31,8 +31,6 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .lg-btn:active{background:#C2410C}
 .lg-err{color:#EF4444;font-size:12px;margin-top:-6px;margin-bottom:10px;display:none}
 .lg-back{background:none;border:none;color:#94A3B8;font-size:13px;margin-top:12px;cursor:pointer;width:100%}
-.lg-demo{margin-top:18px;font-size:11px;color:#94A3B8;text-align:center;line-height:2}
-.lg-demo b{color:#475569;cursor:pointer;text-decoration:underline}
 .lg-loading{text-align:center;padding:20px;color:#94A3B8;font-size:13px}
 
 /* TELA MAIN — layout fixo em colunas */
@@ -142,7 +140,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
     <input class="lg-inp" id="in-token" type="text" placeholder="Ex: ADM-MARCO" autocomplete="off" autocapitalize="characters" spellcheck="false" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')stepToken()">
     <div class="lg-err" id="err-token">Token não reconhecido.</div>
     <button class="lg-btn" onclick="stepToken()">Continuar</button>
-    <div class="lg-demo"><b onclick="fillToken('ADM-MARCO')">ADM-MARCO</b> <b onclick="fillToken('COM-LARA')">COM-LARA</b> <b onclick="fillToken('COM-EDUARDO')">COM-EDUARDO</b></div>
+
   </div>
   <div class="lg-card hi" id="step-register">
     <div class="lg-av" id="reg-av"></div>
@@ -251,7 +249,7 @@ firebase.initializeApp(CFG);
 var auth=firebase.auth(), db=firebase.database();
 var LOGO32="iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAADZklEQVR42u2WX2iWZRjGf8/7vp+uZU4ycDUr68TIkxbB9KSgzSjouHQVBLMOckJkBuKBFuhWzY0gKQdSEERNYQcVkWYWVEPcP4WmNS3at7G5Nlpzfvv2fe/zXB28r18b6b79MyF2nzzvn/u574vrue/ruY0kcQPN4wbbIoBFAPMAIHAhyM4LgJlTG8qC8ae+44Ex15kBKZdccrjORlzyuwiMMREj140BF4IXRI/JE3BsGyb5EyRAD1ZhHt6LKVwVgURgvAViQDYK6AUodRH35fOYDx7FZC+h5z5DFTWYjkNw8F7cmUZkTJTcxfvyszqNORstkuzpRrn6QrkaZH/YI5dN5dzs8FnZw4/L7UHuozLZ/lOTYrhpU1wbQLzR9n0v+2Gpwt3IHnlCbvjcZKecn5Nkf26SfXeVwjeQ/XqbXPrPf/xmBcCFkqTwx9fldiO9f6f0++eTfmcUhqHCicuymXEpnJBsNvoZjkktu+T2ItuwXO5iewzUXjXVNWogaicT3IQeeY2xTW10XFqLXIicxfgJfN/Hb9mO17kf/CVRgcoyNJLhzK0voi0d6J4n43Y1c6uBMF4//qRJO3a8mvve19ur5uZmtRx5Sz1Ha+VO7lN2+BdJ0m8XzquyslL9Q3/lIX9aBmILM+BCMuMpli4tBGB0dJT6hnfo6+3j4PE/aOlfjun/FvvFswAEiQR+sIQwNRK1rnPzaEPjgxfgBQFOUaCeniSZbJat1Vt56L47cEVroaIBkx6KBdpgjMHzg+hY8qjjjNTilmXLSKXGAViz5m4KCgqoq6vnZGs7Cc9BahDZLJK4PDYGQGHhzTMSomBaAmL069bdz6dNhxkYGKC4uJjtr7xMZ+dpNm4s5/aSu6DIwzx2CGMMrW3t3LZyJStWFCEpF2NuQiTJuajXd+7cpX01tVcv1rjDBgcH9dTTm3X8mxORhlibL7zyArA2quNkMqlNm5/RgQPvKZ1O/8vv1wvnVVX1gmpq35RzLgI+A5vRZXSFyu7ubt6u248EGzasZ3VJCROZDF1dXbS1tbO+rIzq6pdIJBJTjnBBbkPnHJ7nkU6n+eroMVpPtTIyMoLv+5SsLqGivJzS0gemAF7wgSRf4CuhzCwGk2BWw4MxxHWDMSaXyMVi43nefzSSLU7FiwD+TwD+BjQNwqGYm7zFAAAAAElFTkSuQmCC";
 
-var USERS={'ADM-MARCO':{nome:'Marco Antonio',cargo:'Sócio Operações',tipo:'admin',cor:'#EA580C'},'ADM-EZEQUIEL':{nome:'Ezequiel Carvalho',cargo:'Sócio Fundador',tipo:'admin',cor:'#0F172A'},'COM-LARA':{nome:'Lara Mendes',cargo:'Consultora Sudeste/Sul',tipo:'comercial',cor:'#1E40AF'},'COM-EDUARDO':{nome:'Eduardo Tavares',cargo:'Consultor Centro-Oeste',tipo:'comercial',cor:'#16A34A'},'COM-PATRICIA':{nome:'Patricia Coutinho',cargo:'Consultora Nordeste',tipo:'comercial',cor:'#7C3AED'}};
+var USERS={'ADM-PHILLIPE':{nome:'Phillipe de Paula',cargo:'Administrador',tipo:'admin',cor:'#1E40AF'},'ADM-JOAO':{nome:'João Gabriel',cargo:'Administrador',tipo:'admin',cor:'#16A34A'},'ADM-MARCO':{nome:'Marco Antonio',cargo:'Administrador',tipo:'admin',cor:'#EA580C'}};
 function tokenEmail(tk){return tk.toLowerCase().replace(/\s/g,'')+'@agilihome.app'}
 function ini(n){return n.split(' ').map(function(x){return x[0]}).slice(0,2).join('').toUpperCase()}
 var SESSAO=null,CONV=null,FORMAL=false,_filtro='todos',_tk=null,_refs=[];
@@ -269,12 +267,24 @@ function pedirNotificacao(){
   }
 }
 function notificar(titulo,corpo){
-  if(!_notifPerm||document.visibilityState==='visible')return;
-  try{new Notification(titulo,{body:corpo,icon:'icon-192.png',badge:'icon-192.png',tag:'agili-msg',renotify:true});}catch(e){}
+  // Som sempre que app estiver aberto
+  tocarSom();
+  // Badge no título
+  incrementarBadge();
+  // Notificação nativa (app em segundo plano)
+  if(_notifPerm&&document.visibilityState!=='visible'){
+    try{
+      // Tenta via Service Worker (melhor suporte iOS PWA)
+      if(window._swReg&&window._swReg.showNotification){
+        window._swReg.showNotification(titulo,{body:corpo,icon:'icon-192.png',badge:'icon-192.png',tag:'agili-msg',renotify:true,vibrate:[200,100,200]});
+      } else {
+        new Notification(titulo,{body:corpo,icon:'icon-192.png',badge:'icon-192.png',tag:'agili-msg',renotify:true});
+      }
+    }catch(e){}
+  }
 }
 
 /* ── LOGIN ── */
-function fillToken(t){$('in-token').value=t;stepToken()}
 function stepToken(){
   var tk=$('in-token').value.trim().toUpperCase();
   var u=USERS[tk];
@@ -359,8 +369,8 @@ function criarGruposPadrao(){
     if(s.exists())return;
     db.ref('grupos').set({
       g_rede:{nome:'Rede agilihome',tipo:'grupo',cor:'#EA580C',membros:'todos',criadorToken:'sistema'},
-      g_consul:{nome:'Consultores',tipo:'grupo',cor:'#1E40AF',membros:'equipe',criadorToken:'sistema'},
-      g_ops:{nome:'Operacional',tipo:'grupo',cor:'#16A34A',membros:'equipe',criadorToken:'sistema'}
+      g_consul:{nome:'Consultores',tipo:'grupo',cor:'#1E40AF',membros:'todos',criadorToken:'sistema'},
+      g_ops:{nome:'Operacional',tipo:'grupo',cor:'#16A34A',membros:'todos',criadorToken:'sistema'}
     });
   });
 }
@@ -398,6 +408,19 @@ function renderLista(){
         }
       });
     }
+    // Diretos entre admins
+    if(_filtro==='todos'||_filtro==='equipe'){
+      Object.keys(USERS).forEach(function(tk){
+        if(tk===SESSAO.token)return;
+        var u=USERS[tk];
+        var cid='dir_'+[SESSAO.token,tk].sort().join('_');
+        html+='<div class="cv" data-canal="'+cid+'" data-nome="'+u.nome+'" data-cor="'+u.cor+'" data-tipo="direto">';
+        html+='<div class="cv-a" style="background:'+u.cor+'">'+ini(u.nome)+'</div>';
+        html+='<div class="cv-b"><div class="cv-tp"><div class="cv-n">'+u.nome+'</div>';
+        html+='<div style="display:flex;align-items:center;gap:6px"><div class="cv-badge" id="badge_'+cid+'" style="display:none">1</div><div class="cv-t" id="t_'+cid+'"></div></div></div>';
+        html+='<div class="cv-p" id="p_'+cid+'">Conversa direta</div></div></div>';
+      });
+    }
     lista.innerHTML=html||'<div style="text-align:center;padding:40px;color:#94A3B8;font-size:13px">Nenhuma conversa</div>';
     Object.keys(grupos).forEach(function(id){
       db.ref('mensagens/'+id).limitToLast(1).on('value',function(ms){
@@ -427,13 +450,11 @@ var _ultimoTs=Date.now();
 function escutarNovasMensagens(){
   // Escuta grupos padrão + diretos do usuário
   var canais=['g_rede','g_consul','g_ops'];
-  // diretos do admin com comerciais
-  if(SESSAO.tipo==='admin'){
-    Object.keys(USERS).forEach(function(tk){
-      if(USERS[tk].tipo==='comercial')
-        canais.push('dir_'+[SESSAO.token,tk].sort().join('_'));
-    });
-  }
+  // diretos com outros admins
+  Object.keys(USERS).forEach(function(tk){
+    if(tk!==SESSAO.token)
+      canais.push('dir_'+[SESSAO.token,tk].sort().join('_'));
+  });
   canais.forEach(function(canal){
     var ref=db.ref('mensagens/'+canal).orderByChild('timestamp').startAt(_ultimoTs+1);
     ref.on('child_added',function(snap){
@@ -544,6 +565,7 @@ function abrirChat(canal,nome,cor,tipo){
   localStorage.setItem('visto_'+canal, Date.now());
   var badgeEl=document.getElementById('badge_'+canal);
   if(badgeEl)badgeEl.style.display='none';
+  limparBadge();
   var av=$('ch-avatar');
   if(canal==='g_rede'){
     av.innerHTML='<img src="data:image/png;base64,'+LOGO32+'" alt="" style="width:100%;height:100%;border-radius:50%">';
@@ -612,6 +634,88 @@ function toggleFormal(){
   $('in-msg').placeholder=FORMAL?'Comunicado oficial (registro jurídico)...':'Mensagem...';
 }
 function autoResize(e){e.style.height='auto';e.style.height=Math.min(e.scrollHeight,100)+'px'}
+
+
+/* ── SOM DE NOTIFICAÇÃO ── */
+function tocarSom(){
+  try{
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var o=ctx.createOscillator();
+    var g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.frequency.setValueAtTime(880,ctx.currentTime);
+    o.frequency.setValueAtTime(660,ctx.currentTime+0.1);
+    g.gain.setValueAtTime(0.3,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.4);
+    o.start(ctx.currentTime);o.stop(ctx.currentTime+0.4);
+  }catch(e){}
+}
+/* Desbloquear AudioContext no primeiro toque */
+document.addEventListener('touchstart',function desbloq(){
+  try{var ctx=new(window.AudioContext||window.webkitAudioContext)();ctx.resume();}catch(e){}
+  document.removeEventListener('touchstart',desbloq);
+},{once:true});
+
+/* ── BADGE NO TÍTULO ── */
+var _naoLidas=0;
+function incrementarBadge(){
+  _naoLidas++;
+  document.title='('+_naoLidas+') agilihome Chat';
+  // iOS PWA icon badge (API experimental)
+  if(navigator.setAppBadge)navigator.setAppBadge(_naoLidas).catch(function(){});
+}
+function limparBadge(){
+  _naoLidas=0;
+  document.title='agilihome Chat';
+  if(navigator.clearAppBadge)navigator.clearAppBadge().catch(function(){});
+}
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='visible')limparBadge();
+});
+
+/* ── FCM PUSH NOTIFICATIONS ── */
+var FCM_VAPID='BNHCHKb8AKd3bL5T8X_4D0g9bj4Z4iZRoDtQt4RjE8psDThDg1AYRlUMhEeHbTg8ZQEt_Wy1fh_Ep-9eH4PpvKE'; // placeholder — substituir
+var _fcmToken=null;
+function iniciarFCM(){
+  if(!('serviceWorker' in navigator)||!('PushManager' in window)){
+    console.log('Push não suportado neste browser');return;
+  }
+  navigator.serviceWorker.register('/agilihome/sw.js').then(function(reg){
+    window._swReg=reg;
+    console.log('SW registrado');
+    // Verificar se já tem assinatura
+    return reg.pushManager.getSubscription().then(function(sub){
+      if(sub){return sub;}
+      // Criar nova assinatura com a chave VAPID
+      return reg.pushManager.subscribe({
+        userVisibleOnly:true,
+        applicationServerKey:urlBase64ToUint8Array(FCM_VAPID)
+      });
+    });
+  }).then(function(sub){
+    if(!sub)return;
+    _fcmToken=JSON.stringify(sub);
+    salvarTokenFCM();
+    console.log('Push subscription ativa');
+  }).catch(function(e){console.log('FCM erro:',e);});
+}
+function salvarTokenFCM(){
+  if(!SESSAO||!_fcmToken)return;
+  db.ref('fcm_tokens/'+SESSAO.token).set({
+    subscription:_fcmToken,
+    ua:navigator.userAgent,
+    ts:Date.now(),
+    nome:SESSAO.nome
+  });
+}
+function urlBase64ToUint8Array(base64String){
+  var padding='='.repeat((4-base64String.length%4)%4);
+  var base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
+  var raw=window.atob(base64);
+  var arr=new Uint8Array(raw.length);
+  for(var i=0;i<raw.length;i++){arr[i]=raw.charCodeAt(i);}
+  return arr;
+}
 
 /* ── AUTO LOGIN ── */
 auth.onAuthStateChanged(function(user){
